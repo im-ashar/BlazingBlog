@@ -2,35 +2,37 @@
 
 namespace BlazingBlog.Data.Models
 {
-	public class Category
-	{
-		public int Id { get; set; }
+    public class Category
+    {
+        public int Id { get; set; }
 
-		[Required, MaxLength(50)]
-		public string Name { get; set; }
+        [Required, MaxLength(50)]
+        public string Name { get; set; }
 
-		[MaxLength(75)]
-		public string Slug { get; set; }
-		public bool ShowOnNavbar { get; set; }
+        [MaxLength(75)]
+        public string Slug { get; set; }
+        public bool ShowOnNavbar { get; set; }
 
-		public static List<Category> GetSeedCatergories()
-		{
-			var seedCatgories = new List<Category> {
-				new Category { Name = "C#", Slug = "c-sharp", ShowOnNavbar = true },
-				new Category { Name = "ASP.NET Core", Slug = "asp-net-core", ShowOnNavbar = true },
-				new Category { Name = "Blazor", Slug = "blazor", ShowOnNavbar = true },
-				new Category { Name = "SQL Server", Slug = "sql-server", ShowOnNavbar = false },
-				new Category { Name = "Entity Framework Core", Slug = "ef-core", ShowOnNavbar = true },
-				new Category { Name = "Angular", Slug = "angular", ShowOnNavbar = false },
-				new Category { Name = "React", Slug = "react", ShowOnNavbar = false },
-				new Category { Name = "Vue", Slug = "vue", ShowOnNavbar = true },
-				new Category { Name = "JavaScript", Slug = "javascript", ShowOnNavbar = false },
-				new Category { Name = "HTML", Slug = "html", ShowOnNavbar = false },
-				new Category { Name = "CSS", Slug = "css", ShowOnNavbar = false },
-				new Category { Name = "Bootstrap", Slug = "bootstrap", ShowOnNavbar = false },
-				new Category { Name = "MVC", Slug = "mvc", ShowOnNavbar = true }
-			};
-			return seedCatgories;
-		}
-	}
+        public Category Clone() => (MemberwiseClone() as Category)!;
+
+        public static List<Category> GetSeedCatergories()
+        {
+            var seedCatgories = new List<Category> {
+                new Category { Name = "C#", Slug = "c-sharp", ShowOnNavbar = true },
+                new Category { Name = "ASP.NET Core", Slug = "asp-net-core", ShowOnNavbar = true },
+                new Category { Name = "Blazor", Slug = "blazor", ShowOnNavbar = true },
+                new Category { Name = "SQL Server", Slug = "sql-server", ShowOnNavbar = false },
+                new Category { Name = "Entity Framework Core", Slug = "ef-core", ShowOnNavbar = true },
+                new Category { Name = "Angular", Slug = "angular", ShowOnNavbar = false },
+                new Category { Name = "React", Slug = "react", ShowOnNavbar = false },
+                new Category { Name = "Vue", Slug = "vue", ShowOnNavbar = true },
+                new Category { Name = "JavaScript", Slug = "javascript", ShowOnNavbar = false },
+                new Category { Name = "HTML", Slug = "html", ShowOnNavbar = false },
+                new Category { Name = "CSS", Slug = "css", ShowOnNavbar = false },
+                new Category { Name = "Bootstrap", Slug = "bootstrap", ShowOnNavbar = false },
+                new Category { Name = "MVC", Slug = "mvc", ShowOnNavbar = true }
+            };
+            return seedCatgories;
+        }
+    }
 }

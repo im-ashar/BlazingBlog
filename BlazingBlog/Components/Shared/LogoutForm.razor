@@ -1,0 +1,19 @@
+﻿@inject NavigationManager NavigationManager
+<form action="Account/Logout" method="post" class="d-flex justify-content-center align-items-center w-100">
+    <AntiforgeryToken />
+    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+    <Button Type="ButtonType.Submit" Color="ButtonColor.Danger">
+        <Icon Name="IconName.ArrowLeft" />
+        Logout
+    </Button>
+</form>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.BaseUri);
+    }
+
+}

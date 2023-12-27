@@ -1,0 +1,11 @@
+﻿@code {
+    [Parameter, EditorRequired]
+    public ErrorBoundary errorBoundary { get; set; }
+    protected override void OnInitialized()
+    {
+        if (errorBoundary.MaximumErrorCount <= 3)
+        {
+            errorBoundary.Recover();
+        }
+    }
+}

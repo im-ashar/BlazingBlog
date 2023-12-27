@@ -1,20 +1,11 @@
 ﻿using BlazingBlog.Data;
 using BlazingBlog.Data.Models;
+using BlazingBlog.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazingBlog.Services
 {
-	internal class AdminAccount
-	{
-		public const string Username = "admin";
-		public const string Password = "P@ssword1";
-		public const string Email = "admin@email.com";
-		public const string Name = "Administrator";
-		public const string AdminRole = "Admin";
-		public const string UserRole = "User";
-	}
-
 	public interface ISeedDataService
 	{
 		Task SeedDataAsync();
@@ -59,23 +50,25 @@ namespace BlazingBlog.Services
 
 		private async Task SeedAdminUserIfNotExists()
 		{
-			if (await _userManager.FindByNameAsync(AdminAccount.Username) == null)
+			if (await _userManager.FindByNameAsync(AppConstants.AdminAccount.Username) == null)
 			{
 				// if it doesn't exist, create it
 				var user = new ApplicationUser
 				{
-					UserName = AdminAccount.Username,
-					Email = AdminAccount.Email,
-					Name = AdminAccount.Name
+					UserName = AppConstants.AdminAccount.Username,
+					Email = AppConstants.AdminAccount.Email,
+					Name = AppConstants.AdminAccount.Name,
+					EmailConfirmed = true,
+					LockoutEnabled = false
 				};
-				var result = await _userManager.CreateAsync(user, AdminAccount.Password);
+				var result = await _userManager.CreateAsync(user, AppConstants.AdminAccount.Password);
 				if (!result.Succeeded)
 				{
 					var errors = result.Errors.Select(e => e.Description);
 					throw new Exception(string.Join(Environment.NewLine, errors));
 				}
 				//Add Admin user to AdminRole
-				result = await _userManager.AddToRoleAsync(user, AdminAccount.AdminRole);
+				result = await _userManager.AddToRoleAsync(user, AppConstants.RolesTypes.AdminRole);
 				if (!result.Succeeded)
 				{
 					var errors = result.Errors.Select(e => e.Description);
@@ -86,10 +79,10 @@ namespace BlazingBlog.Services
 
 		private async Task SeedUserRoleIfNotExists()
 		{
-			if (!await _roleManager.RoleExistsAsync(AdminAccount.UserRole))
+			if (!await _roleManager.RoleExistsAsync(AppConstants.RolesTypes.UserRole))
 			{
 				// if it doesn't exist, create it
-				var result = await _roleManager.CreateAsync(new IdentityRole(AdminAccount.UserRole));
+				var result = await _roleManager.CreateAsync(new IdentityRole(AppConstants.RolesTypes.UserRole));
 				if (!result.Succeeded)
 				{
 					var errors = result.Errors.Select(e => e.Description);
@@ -100,10 +93,10 @@ namespace BlazingBlog.Services
 
 		private async Task SeedAdminRoleIfNotExists()
 		{
-			if (!await _roleManager.RoleExistsAsync(AdminAccount.AdminRole))
+			if (!await _roleManager.RoleExistsAsync(AppConstants.RolesTypes.AdminRole))
 			{
 				// if it doesn't exist, create it
-				var result = await _roleManager.CreateAsync(new IdentityRole(AdminAccount.AdminRole));
+				var result = await _roleManager.CreateAsync(new IdentityRole(AppConstants.RolesTypes.AdminRole));
 				if (!result.Succeeded)
 				{
 					var errors = result.Errors.Select(e => e.Description);

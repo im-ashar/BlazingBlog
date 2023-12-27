@@ -2,6 +2,7 @@ using BlazingBlog.Components;
 using BlazingBlog.Components.Account;
 using BlazingBlog.Data;
 using BlazingBlog.Services;
+using BlazingBlog.Utilities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-	.AddInteractiveServerComponents();
+    .AddInteractiveServerComponents();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -18,25 +19,29 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
-	{
-		options.DefaultScheme = IdentityConstants.ApplicationScheme;
-		options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-	})
-	.AddIdentityCookies();
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	.AddRoles<IdentityRole>()
-	.AddEntityFrameworkStores<ApplicationDbContext>()
-	.AddSignInManager()
-	.AddDefaultTokenProviders();
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-builder.Services.AddTransient<ISeedDataService, SeedDataService>();
+builder.Services.AddScoped<ISeedDataService, SeedDataService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBlogPostAdminService, BlogPostAdminService>();
+builder.Services.AddSingleton<ToastServiceExtended>();
+builder.Services.AddBlazorBootstrap();
 var app = builder.Build();
 
 await SeedAsync(app.Services);
@@ -44,13 +49,13 @@ await SeedAsync(app.Services);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseMigrationsEndPoint();
+    app.UseMigrationsEndPoint();
 }
 else
 {
-	app.UseExceptionHandler("/Error", createScopeForErrors: true);
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -59,7 +64,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
-	.AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
@@ -69,7 +74,7 @@ app.Run();
 
 static async Task SeedAsync(IServiceProvider services)
 {
-	var scope = services.CreateScope();
-	var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
-	await seedDataService.SeedDataAsync();
+    var scope = services.CreateScope();
+    var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
+    await seedDataService.SeedDataAsync();
 }

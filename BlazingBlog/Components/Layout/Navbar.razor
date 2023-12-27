@@ -1,41 +1,76 @@
-﻿<nav class="topnav navbar navbar-expand-lg navbar-light bg-white fixed-top">
-    <div class="container">
+﻿@using BlazingBlog.Data
+@using BlazingBlog.Data.Models
+@using BlazingBlog.Services
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ICategoryService CategoryService
+
+<nav class="navbar navbar-expand-lg fixed-top py-0">
+    <div class="container" style="min-height:55px;background-color: #e3f2fd;">
         <a class="navbar-brand" href="/"><strong>Blazing Blog</strong></a>
-        <button class="navbar-toggler collapsed" type="button" onclick="toggleMenu(event)" aria-controls="top-navbar—menu—wrapper" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="navbar-collapse collapse" id="top-navbar-menu-wrapper">
-            <ul class="navbar-nav mr-auto d-flex align-items-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="category">Culture</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="category">Tech</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="category">Politics</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="category">Health</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="category">Collections</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./about.html">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./docs.html">Template <span class="badge badge-secondary">docs</span></a>
-                </li>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                @foreach (var category in _categories)
+                {
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="category">
+                            @category.Name
+                        </NavLink>
+                    </li>
+                }
             </ul>
-            <ul class="navbar-nav ml-auto d-flex align-items-center">
-                <li class="nav-item highlight">
-                    <a class="nav-link" href="https://www.wowthemes.net/mundana-free-html-bootstrap-template/">Get this Theme</a>
-                </li>
-            </ul>
+            <div class="d-flex">
+                <AuthorizeView>
+                    <Authorized>
+                        <ul class="navbar-nav ms-auto d-flex align-items-center">
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="admin/dashboard">
+                                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.GetNameOfUser()
+                                </NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <LogoutForm />
+                            </li>
+                        </ul>
+                    </Authorized>
+                    <NotAuthorized>
+                        <ul class="navbar-nav ms-auto d-flex align-items-center">
+                            <li class="nav-item me-1">
+                                <NavLink class="nav-link btn btn-info" href="account/login">Login</NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink class="nav-link btn btn-info" href="account/register">Register</NavLink>
+                            </li>
+                        </ul>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
         </div>
     </div>
 </nav>
+@code {
+    private Category[] _categories = [];
+    private const int maxCategoriesToShowOnNavbar = 5;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await GetCategoriesToShowOnNavbar();
+    }
+
+    private async Task GetCategoriesToShowOnNavbar()
+    {
+        var categories = await CategoryService.GetCategoriesAsync();
+        _categories = categories
+                                .Where(c => c.ShowOnNavbar)
+                                .Take(maxCategoriesToShowOnNavbar)
+                                .ToArray();
+        if (_categories.Length < maxCategoriesToShowOnNavbar)
+        {
+            _categories = [.. _categories, .. categories.Where(c => !c.ShowOnNavbar).Take(maxCategoriesToShowOnNavbar - _categories.Length).ToArray()];
+        }
+    }
+}

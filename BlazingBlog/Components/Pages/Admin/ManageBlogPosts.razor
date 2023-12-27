@@ -1,0 +1,131 @@
+﻿@page "/admin/manage-posts"
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+@inject IBlogPostAdminService BlogPostAdminService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ToastServiceExtended ToastService
+@using SortDirection=BlazorBootstrap.SortDirection;
+<ErrorToast />
+<AdminHeader Title="Manage BlogPosts">
+    <ActionButtons>
+        <a href="/admin/manage-posts/new" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center" data-enhance-nav="false">
+            <Icon Name="IconName.PlusCircleFill" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+            Add New Blog Post
+        </a>
+    </ActionButtons>
+</AdminHeader>
+
+@* Microsoft QuickGrid *@
+@* <QuickGrid ItemsProvider="_blogPostsProvider" Pagination="paginationState">
+    <PropertyColumn Property="@(b=>b.Id)" />
+    <PropertyColumn Property="@(b=>b.Title)" />
+</QuickGrid>
+<Paginator State="paginationState" /> *@
+
+<div class="card shadow p-3">
+    <Grid TItem="BlogPost"
+          Class="table table-hover table-bordered table-striped "
+          DataProvider="BlogPostProvider"
+          AllowFiltering="true"
+          Responsive="true" AllowPaging="true"
+          AllowSorting="true"
+          PageSize="5"
+          PageSizeSelectorVisible="true"
+          PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+          ItemsPerPageText="Select Number Of Items To Show"
+          PaginationItemsTextFormat="{0} - {1} of {2} Items">
+
+        <GridColumn TItem="BlogPost" HeaderText="@nameof(BlogPost.Id)" PropertyName="@nameof(BlogPost.Id)" SortString="@nameof(BlogPost.Id)" SortKeySelector="item=>item.Id" IsDefaultSortColumn="true">
+            @context.Id
+        </GridColumn>
+        <GridColumn TItem="BlogPost" HeaderText="@nameof(BlogPost.Title)" PropertyName="@nameof(BlogPost.Title)" SortString="@nameof(BlogPost.Title)" SortKeySelector="item=>item.Title">
+            @context.Title
+        </GridColumn>
+        <GridColumn TItem="BlogPost" HeaderText="Category Name" PropertyName="@nameof(BlogPost.Category.Name)" SortString="@nameof(BlogPost.Category.Name)" SortKeySelector="item=>item.Category.Name">
+            @context.Category.Name
+        </GridColumn>
+        <GridColumn TItem="BlogPost" HeaderText="Featured?" PropertyName="@nameof(BlogPost.IsFeatured)" SortString="@nameof(BlogPost.IsFeatured)" SortKeySelector="item=>item.IsFeatured">
+            @if (context.IsFeatured)
+            {
+                <Switch class="text-success" Label="Yes" Value="context.IsFeatured" ValueExpression="() => context.IsFeatured" ValueChanged="@(()=>HandleIsFeaturedAsync(context))" />
+            }
+            else
+            {
+                <Switch Class="text-danger" Label="No" Value="context.IsFeatured" ValueExpression="() => context.IsFeatured" ValueChanged="@(()=>HandleIsFeaturedAsync(context))" />
+            }
+        </GridColumn>
+        <GridColumn TItem="BlogPost" HeaderText="Published?" PropertyName="@nameof(BlogPost.IsPublished)" SortString="@nameof(BlogPost.IsPublished)" SortKeySelector="item=>item.IsPublished">
+            @if (context.IsFeatured)
+            {
+                <Switch class="text-success" Label="Yes" Value="context.IsPublished" ValueExpression="() => context.IsPublished" ValueChanged="@(()=>HandleIsPublishedAsync(context))" />
+            }
+            else
+            {
+                <Switch Class="text-danger" Label="No" Value="context.IsPublished" ValueExpression="() => context.IsPublished" ValueChanged="@(()=>HandleIsPublishedAsync(context))" />
+            }
+        </GridColumn>
+        <GridColumn TItem="BlogPost" HeaderText="Actions" Filterable="false">
+            @* <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button> *@
+            @* <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button> *@
+        </GridColumn>
+    </Grid>
+</div>
+
+@code {
+    private const int pageSize = 10;
+
+    private PaginationState paginationState = new PaginationState { ItemsPerPage = pageSize };
+
+    private GridItemsProvider<BlogPost> _blogPostsProvider;
+
+    // protected override void OnInitialized()
+    // {
+    //     _blogPostsProvider = async request =>
+    //     {
+    //         var pagesBlogs = await BlogPostAdminService.GetBlogPostsAsync(request.StartIndex, request.Count ?? pageSize);
+    //         var gridItemsProvider = GridItemsProviderResult.From(pagesBlogs.Records, pagesBlogs.TotalCount);
+    //         return gridItemsProvider;
+    //     };
+    // }
+    private async Task<GridDataProviderResult<BlogPost>> BlogPostProvider(GridDataProviderRequest<BlogPost> request)
+    {
+        string sortString = "";
+        SortDirection sortDirection = SortDirection.None;
+
+        if (request.Sorting is not null && request.Sorting.Any())
+        {
+            // Note: Multi column sorting is not supported at this moment
+            sortString = request.Sorting.FirstOrDefault().SortString;
+            sortDirection = request.Sorting.FirstOrDefault().SortDirection;
+        }
+        var result = await BlogPostAdminService.GetBlogPostsAsync(request.Filters, request.PageNumber, request.PageSize, sortString, sortDirection);
+        return await Task.FromResult(new GridDataProviderResult<BlogPost> { Data = result.Item1, TotalCount = result.Item2 });
+    }
+    private async Task HandleIsFeaturedAsync(BlogPost blogPost)
+    {
+        try
+        {
+            var user = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = user.User.GetIdOfUser();
+            blogPost.IsFeatured = !blogPost.IsFeatured;
+            await BlogPostAdminService.SaveBlogPostAsync(blogPost, userId);
+        }
+        catch (Exception ex)
+        {
+            ex.ShowErrorToast(ToastService);
+        }
+    }
+    private async Task HandleIsPublishedAsync(BlogPost blogPost)
+    {
+        try
+        {
+            var user = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = user.User.GetIdOfUser();
+            blogPost.IsPublished = !blogPost.IsPublished;
+            await BlogPostAdminService.SaveBlogPostAsync(blogPost, userId);
+        }
+        catch (Exception ex)
+        {
+            ex.ShowErrorToast(ToastService);
+        }
+    }
+}

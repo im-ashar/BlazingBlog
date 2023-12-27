@@ -13,7 +13,16 @@ document.addEventListener("DOMContentLoaded", _ => {
     }
 });
 
-function toggleMenu(e) {
-    e.target.classList.toggle('collapsed');
-    document.getElementById('top-navbar-menu-wrapper').classList.toggle('show');
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById("password");
+    const passwordIcon = document.getElementById("password-icon");
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        passwordIcon.classList.remove("bi-eye-slash");
+        passwordIcon.classList.add("bi-eye");
+    } else {
+        passwordInput.type = "password";
+        passwordIcon.classList.remove("bi-eye");
+        passwordIcon.classList.add("bi-eye-slash");
+    }
 }

@@ -1,0 +1,68 @@
+﻿@page "/admin/manage-categories"
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+<ErrorToast />
+<AdminHeader Title="Manage Catergories">
+    <ActionButtons>
+        <Button Class="d-flex justify-content-center align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Primary" Size="Size.Small" @onclick="()=>HandleNewCategory()">
+            <Icon Name="IconName.PlusCircleFill" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+            <span>Add New Category</span>
+        </Button>
+    </ActionButtons>
+</AdminHeader>
+<Modal @ref="modal" Title="@((selectedCategory==null||string.IsNullOrWhiteSpace(selectedCategory!.Name)) ? "Add A New Category" : $"Edit {selectedCategory.Name}")" IsVerticallyCentered="true">
+    <BodyTemplate>
+        <EditForm Model="selectedCategory" OnValidSubmit="SaveCategoryAsync">
+            <DataAnnotationsValidator />
+            <div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="selectedCategory!.Name" class="form-control" placeholder="Category Name" />
+                    <label for="@selectedCategory!.Name" class="form-label">Category Name</label>
+                    <ValidationMessage For="()=>selectedCategory.Name" />
+                </div>
+                <div class="form-floating mb-3">
+                    <Switch Label="Show On Navbar" @bind-Value="selectedCategory.ShowOnNavbar" />
+                </div>
+            </div>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Success">Save Changes</Button>
+            <Button Color="ButtonColor.Danger" @onclick="()=>HandleModal(false)">Close</Button>
+        </EditForm>
+    </BodyTemplate>
+</Modal>
+<div class="card shadow p-3">
+<Grid TItem="Category"
+          Class="table table-hover table-bordered table-striped "
+      DataProvider="CategoriesProvider"
+      AllowFiltering="true"
+      Responsive="true" AllowPaging="true"
+      AllowSorting="true"
+      PageSize="5"
+      PageSizeSelectorVisible="true"
+      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+      ItemsPerPageText="Select Number Of Items To Show"
+      PaginationItemsTextFormat="{0} - {1} of {2} Items">
+
+    <GridColumn TItem="Category" HeaderText="@nameof(Category.Id)" PropertyName="@nameof(Category.Id)" SortKeySelector="item=>item.Id">
+        @context.Id
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="@nameof(Category.Name)" PropertyName="@nameof(Category.Name)" SortKeySelector="item=>item.Name">
+        @context.Name
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="@nameof(Category.Slug)" PropertyName="@nameof(Category.Slug)" SortKeySelector="item=>item.Slug">
+        @context.Slug
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="Show On Navbar" PropertyName="@nameof(Category.ShowOnNavbar)" SortKeySelector="item=>item.ShowOnNavbar">
+        @if (context.ShowOnNavbar)
+        {
+            <Switch class="text-success" Label="Yes" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
+        }
+        else
+        {
+            <Switch Class="text-danger" Label="No" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
+        }
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="Actions" Filterable="false">
+        <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button>
+        <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button>
+    </GridColumn>
+</Grid>
+</div>
