@@ -1,5 +1,5 @@
 using BlazingBlog.Components;
-using BlazingBlog.Components.Account;
+using BlazingBlog.Components.Pages.Account.Identity;
 using BlazingBlog.Data;
 using BlazingBlog.Services;
 using BlazingBlog.Utilities;
@@ -14,7 +14,6 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
@@ -40,7 +39,8 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped<ISeedDataService, SeedDataService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBlogPostAdminService, BlogPostAdminService>();
-builder.Services.AddSingleton<ToastServiceExtended>();
+builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+builder.Services.AddScoped<ISubscriberService, SubscriberService>();
 builder.Services.AddBlazorBootstrap();
 var app = builder.Build();
 

@@ -1,10 +1,16 @@
 ﻿@page "/admin/manage-posts"
+<PageTitle>Manage BlogPosts</PageTitle>
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 @inject IBlogPostAdminService BlogPostAdminService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject ToastServiceExtended ToastService
+@inject ToastService ToastService
+@inject NavigationManager NavigationManager
 @using SortDirection=BlazorBootstrap.SortDirection;
-<ErrorToast />
+<style type="text/css">
+    table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
 <AdminHeader Title="Manage BlogPosts">
     <ActionButtons>
         <a href="/admin/manage-posts/new" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center" data-enhance-nav="false">
@@ -13,16 +19,52 @@
         </a>
     </ActionButtons>
 </AdminHeader>
-
-@* Microsoft QuickGrid *@
-@* <QuickGrid ItemsProvider="_blogPostsProvider" Pagination="paginationState">
-    <PropertyColumn Property="@(b=>b.Id)" />
-    <PropertyColumn Property="@(b=>b.Title)" />
-</QuickGrid>
-<Paginator State="paginationState" /> *@
-
+<Modal @ref="modal" Title="Delete Blog Post" UseStaticBackdrop="true">
+    <BodyTemplate>
+        <p class="h5 fw-bold">Are You Sure You Want To Delete This Blog Post?</p>
+        <div class="row">
+            <div class="d-inline-flex align-items-center my-1">
+                <div>
+                    <h6 class="h6 m-0 fw-bold">Id:&nbsp;</h6>
+                </div>
+                <div>
+                    <p class="m-0" style="padding-top:2px">@selectedBlogPost.Id</p>
+                </div>
+            </div>
+            <div class="d-inline-flex align-items-center my-1">
+                <div>
+                    <h6 class="h6 m-0 fw-bold">Title:&nbsp;</h6>
+                </div>
+                <div>
+                    <p class="m-0" style="padding-top:2px">@selectedBlogPost.Title</p>
+                </div>
+            </div>
+            <div class="d-inline-flex align-items-center my-1">
+                <div>
+                    <h6 class="h6 m-0 fw-bold">Slug:&nbsp;</h6>
+                </div>
+                <div>
+                    <p class="m-0" style="padding-top:2px">@selectedBlogPost.Slug</p>
+                </div>
+            </div>
+            <div class="d-inline-flex align-items-center my-1">
+                <div>
+                    <h6 class="h6 m-0 fw-bold">Category:&nbsp;</h6>
+                </div>
+                <div>
+                    <p class="m-0" style="padding-top:2px">@selectedBlogPost.Category.Name</p>
+                </div>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Type="ButtonType.Button" @onclick="()=>DeleteBlogPostAsync(selectedBlogPost)" Color="ButtonColor.Danger">Yes</Button>
+        <Button Color="ButtonColor.Light" @onclick="()=>HandleDeleteModal(false,null!)">No</Button>
+    </FooterTemplate>
+</Modal>
 <div class="card shadow p-3">
     <Grid TItem="BlogPost"
+          @ref="grid"
           Class="table table-hover table-bordered table-striped "
           DataProvider="BlogPostProvider"
           AllowFiltering="true"
@@ -38,7 +80,20 @@
             @context.Id
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="@nameof(BlogPost.Title)" PropertyName="@nameof(BlogPost.Title)" SortString="@nameof(BlogPost.Title)" SortKeySelector="item=>item.Title">
-            @context.Title
+            <div class="py-2" style="display:grid; grid-template-columns: 60px auto; grid-column-gap:10px;">
+                <img src="@context.Image" style="height:60px; width:60px;object-fit:cover" />
+                <div>
+                    <lable class="mb-0 d-block">@context.Title</lable>
+                    @if (context.IsPublished)
+                    {
+                        <a href="/posts/@context.Slug" target="_blank">@context.Slug</a>
+                    }
+                    else
+                    {
+                        <lable>@context.Slug</lable>
+                    }
+                </div>
+            </div>
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="Category Name" PropertyName="@nameof(BlogPost.Category.Name)" SortString="@nameof(BlogPost.Category.Name)" SortKeySelector="item=>item.Category.Name">
             @context.Category.Name
@@ -54,7 +109,7 @@
             }
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="Published?" PropertyName="@nameof(BlogPost.IsPublished)" SortString="@nameof(BlogPost.IsPublished)" SortKeySelector="item=>item.IsPublished">
-            @if (context.IsFeatured)
+            @if (context.IsPublished)
             {
                 <Switch class="text-success" Label="Yes" Value="context.IsPublished" ValueExpression="() => context.IsPublished" ValueChanged="@(()=>HandleIsPublishedAsync(context))" />
             }
@@ -64,28 +119,16 @@
             }
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="Actions" Filterable="false">
-            @* <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button> *@
-            @* <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button> *@
+            <a href="/admin/manage-posts/edit/@context.Id" data-enhance-nav="false" class="btn btn-info btn-sm">Edit</a>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>HandleDeleteModal(true,context)">Delete</Button>
         </GridColumn>
     </Grid>
 </div>
 
 @code {
-    private const int pageSize = 10;
-
-    private PaginationState paginationState = new PaginationState { ItemsPerPage = pageSize };
-
-    private GridItemsProvider<BlogPost> _blogPostsProvider;
-
-    // protected override void OnInitialized()
-    // {
-    //     _blogPostsProvider = async request =>
-    //     {
-    //         var pagesBlogs = await BlogPostAdminService.GetBlogPostsAsync(request.StartIndex, request.Count ?? pageSize);
-    //         var gridItemsProvider = GridItemsProviderResult.From(pagesBlogs.Records, pagesBlogs.TotalCount);
-    //         return gridItemsProvider;
-    //     };
-    // }
+    private Modal modal = default!;
+    private Grid<BlogPost> grid = default!;
+    private BlogPost selectedBlogPost = default!;
     private async Task<GridDataProviderResult<BlogPost>> BlogPostProvider(GridDataProviderRequest<BlogPost> request)
     {
         string sortString = "";
@@ -94,8 +137,8 @@
         if (request.Sorting is not null && request.Sorting.Any())
         {
             // Note: Multi column sorting is not supported at this moment
-            sortString = request.Sorting.FirstOrDefault().SortString;
-            sortDirection = request.Sorting.FirstOrDefault().SortDirection;
+            sortString = request.Sorting.FirstOrDefault()!.SortString;
+            sortDirection = request.Sorting.FirstOrDefault()!.SortDirection;
         }
         var result = await BlogPostAdminService.GetBlogPostsAsync(request.Filters, request.PageNumber, request.PageSize, sortString, sortDirection);
         return await Task.FromResult(new GridDataProviderResult<BlogPost> { Data = result.Item1, TotalCount = result.Item2 });
@@ -122,6 +165,45 @@
             var userId = user.User.GetIdOfUser();
             blogPost.IsPublished = !blogPost.IsPublished;
             await BlogPostAdminService.SaveBlogPostAsync(blogPost, userId);
+        }
+        catch (Exception ex)
+        {
+            ex.ShowErrorToast(ToastService);
+        }
+    }
+    private async Task DeleteBlogPostAsync(BlogPost blogPost)
+    {
+        try
+        {
+            var result = await BlogPostAdminService.DeleteBlogPostAsync(blogPost.Id);
+            if (result != null)
+            {
+                ToastService.ShowSuccessToast("Blog Post Deleted Successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.ShowErrorToast(ToastService);
+        }
+        finally
+        {
+            await HandleDeleteModal(false, null!);
+            await grid.RefreshDataAsync();
+        }
+    }
+    private async Task HandleDeleteModal(bool openModal, BlogPost blogPost)
+    {
+        try
+        {
+            if (openModal && blogPost != null)
+            {
+                selectedBlogPost = blogPost;
+                await modal.ShowAsync();
+            }
+            else
+            {
+                await modal.HideAsync();
+            }
         }
         catch (Exception ex)
         {

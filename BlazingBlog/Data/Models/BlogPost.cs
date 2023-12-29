@@ -14,11 +14,11 @@ namespace BlazingBlog.Data.Models
         [MaxLength(125)]
         public string Slug { get; set; }
 
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Image { get; set; }
 
-        [Required, NotMapped]
-        public IBrowserFile ImageFile { get; set; }
+        [NotMapped]
+        public IBrowserFile? ImageFile { get; set; }
 
         [Required, MaxLength(500)]
         public string Introduction { get; set; }

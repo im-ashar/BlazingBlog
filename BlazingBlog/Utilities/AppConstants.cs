@@ -9,7 +9,7 @@
         }
         public static class ClaimNames
         {
-            public const string Name = "Name";
+            public const string FullName = "Name";
         }
         public static class AdminAccount
         {

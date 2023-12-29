@@ -1,0 +1,32 @@
+﻿@page "/admin/manage-subscribers"
+<PageTitle>Manage Subscribers</PageTitle>
+@inject ISubscriberService SubscriberService
+
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
+<AdminHeader Title="Manage Subscribers" />
+
+<QuickGrid ItemsProvider="_subscribersProvider" Pagination="paginationState" Class="table table-bordered table-striped">
+    <PropertyColumn Property="@(b=>b.Name)" />
+    <PropertyColumn Property="@(b=>b.Email)" />
+    <PropertyColumn Property="@(b=>b.SubscribedOn)" Format="MM-dd-yyy hh:mm:ss" Title="Subscribed On" />
+</QuickGrid>
+<Paginator State="paginationState" />
+
+@code {
+    private const int pageSize = 5;
+
+    private PaginationState paginationState = new PaginationState { ItemsPerPage = pageSize };
+
+    private GridItemsProvider<Subscriber> _subscribersProvider = default!;
+
+    protected override void OnInitialized()
+    {
+        _subscribersProvider = async request =>
+        {
+            var pagesBlogs = await SubscriberService.GetSubscribersAsync(request.StartIndex, request.Count ?? pageSize);
+            var gridItemsProvider = GridItemsProviderResult.From(pagesBlogs.Records, pagesBlogs.TotalCount);
+            return gridItemsProvider;
+        };
+    }
+}

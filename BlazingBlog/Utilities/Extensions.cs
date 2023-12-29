@@ -6,13 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace BlazingBlog.Utilities
 {
-    public class ToastServiceExtended : ToastService
-    {
-    }
-
     public static class Extensions
     {
-        public static string GetNameOfUser(this ClaimsPrincipal principal) => principal.FindFirstValue(AppConstants.ClaimNames.Name)!;
+        public static string GetFullNameOfUser(this ClaimsPrincipal principal) => principal.FindFirstValue(AppConstants.ClaimNames.FullName)!;
         public static string GetIdOfUser(this ClaimsPrincipal principal) => principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         public static string ToSlug(this string name)
@@ -22,7 +18,7 @@ namespace BlazingBlog.Utilities
                       .Trim('-');
             return name;
         }
-        public static void ShowErrorToast(this Exception ex, ToastServiceExtended toastService)
+        public static void ShowErrorToast(this Exception ex, ToastService toastService)
         {
             toastService.Notify(new ToastMessage
             {
@@ -31,7 +27,7 @@ namespace BlazingBlog.Utilities
                 Type = ToastType.Danger
             });
         }
-        public static void ShowSuccessToast(this ToastServiceExtended toastService, string message)
+        public static void ShowSuccessToast(this ToastService toastService, string message)
         {
             toastService.Notify(new ToastMessage
             {
@@ -64,5 +60,6 @@ namespace BlazingBlog.Utilities
                 throw new Exception($"Error While Uploading Image");
             }
         }
+        public static string ToDisplay(this DateTime? dateTime) => dateTime?.ToString("MMM dd") ?? string.Empty;
     }
 }

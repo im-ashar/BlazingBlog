@@ -1,27 +1,56 @@
-﻿<div class="container pt-4 pb-4">
+﻿@inject ISubscriberService SubscriberService
+@inject ToastService ToastService
+@rendermode InteractiveServer
+<div class="container pt-4 pb-4">
     <div class="border p-5 bg-lightblue">
         <div class="row justify-content-between">
             <div class="col-md-6">
-                <h5 class="font-weight-bold secondfont">Become a member</h5>
+                <h5 class="fw-bold secondfont">Become a member</h5>
                 Get the latest news right in your inbox. It's free and you can unsubscribe at any time. We hate spam as much as we do, so we never spam!
             </div>
             <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" psaceholder="Name">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" psaceholder="Email">
-                    </div>
-                    <div class="col-md-12 mt-3">
-                        <button type="submit" class="btn btn-success btn-block">Subscribe</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <EditForm Model="model" method="post" FormName="subscribe-form" Enhance OnValidSubmit="SaveSubscriber">
+                     <DataAnnotationsValidator />
+                     <div class="row">
+                         <div class="col-md-6">
+                             <InputText @bind-Value="model.Name" class="form-control" placeholder="Name" />
+                             <ValidationMessage For="()=>model.Name" />
+                         </div>
+                         <div class="col-md-6">
+                             <InputText @bind-Value="model.Email" class="form-control" placeholder="Email" />
+                             <ValidationMessage For="()=>model.Email" />
+                         </div>
+                         <div class="col-md-12 mt-3">
+                             <button type="submit" class="btn btn-success btn-block">Subscribe</button>
+                         </div>
+                     </div>
+                 </EditForm>
+             </div>
+         </div>
+     </div>
+ </div>
 
-@code {
+ @code {
+    [SupplyParameterFromForm]
+    public Subscriber model { get; set; } = new();
 
+    private async Task SaveSubscriber()
+    {
+        try
+        {
+            var result = await SubscriberService.SaveSubscriberAsync(model);
+            if (result != null)
+            {
+                ToastService.ShowSuccessToast("You have successfully subscribed to our newsletter.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.ShowErrorToast(ToastService);
+        }
+        finally
+        {
+            model = new Subscriber();
+        }
+    }
 }

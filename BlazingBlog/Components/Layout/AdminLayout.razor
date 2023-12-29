@@ -5,14 +5,14 @@
         <div class="col-md-2 bg-light py-3 card shadow" style="min-height:calc(100vh - 200px)">
             <AuthorizeView>
                 <Authorized>
-                    <h6 class="text-center font-weight-bold">Welcome @context.User.GetNameOfUser()</h6>
+                    <h6 class="text-center fw-bold">Welcome @context.User.GetFullNameOfUser()</h6>
                 </Authorized>
             </AuthorizeView>
             <hr />
             <div class="list-group">
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-categories">Manage Categories</NavLink>
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-posts">Manage Posts</NavLink>
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-subscriber">Manage Subscribers</NavLink>
+                <NavLink data-enhance-nav="false" class="list-group-item list-group-item-action" href="admin/manage-categories">Manage Categories</NavLink>
+                <NavLink data-enhance-nav="false" class="list-group-item list-group-item-action" href="admin/manage-posts">Manage Posts</NavLink>
+                <NavLink data-enhance-nav="false" class="list-group-item list-group-item-action" href="admin/manage-subscribers">Manage Subscribers</NavLink>
                 <div class="list-group-item list-group-item-action">
                     <LogoutForm />
                 </div>

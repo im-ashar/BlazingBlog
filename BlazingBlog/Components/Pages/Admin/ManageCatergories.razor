@@ -1,6 +1,6 @@
 ﻿@page "/admin/manage-categories"
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
-<ErrorToast />
+<PageTitle>Manage Categories</PageTitle>
 <AdminHeader Title="Manage Catergories">
     <ActionButtons>
         <Button Class="d-flex justify-content-center align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Primary" Size="Size.Small" @onclick="()=>HandleNewCategory()">
@@ -9,7 +9,7 @@
         </Button>
     </ActionButtons>
 </AdminHeader>
-<Modal @ref="modal" Title="@((selectedCategory==null||string.IsNullOrWhiteSpace(selectedCategory!.Name)) ? "Add A New Category" : $"Edit {selectedCategory.Name}")" IsVerticallyCentered="true">
+<Modal @ref="modal" IsVerticallyCentered="true">
     <BodyTemplate>
         <EditForm Model="selectedCategory" OnValidSubmit="SaveCategoryAsync">
             <DataAnnotationsValidator />
@@ -29,40 +29,41 @@
     </BodyTemplate>
 </Modal>
 <div class="card shadow p-3">
-<Grid TItem="Category"
+    <Grid TItem="Category"
+          @ref="grid"
           Class="table table-hover table-bordered table-striped "
-      DataProvider="CategoriesProvider"
-      AllowFiltering="true"
-      Responsive="true" AllowPaging="true"
-      AllowSorting="true"
-      PageSize="5"
-      PageSizeSelectorVisible="true"
-      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
-      ItemsPerPageText="Select Number Of Items To Show"
-      PaginationItemsTextFormat="{0} - {1} of {2} Items">
+          DataProvider="CategoriesProvider"
+          AllowFiltering="true"
+          Responsive="true" AllowPaging="true"
+          AllowSorting="true"
+          PageSize="5"
+          PageSizeSelectorVisible="true"
+          PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+          ItemsPerPageText="Select Number Of Items To Show"
+          PaginationItemsTextFormat="{0} - {1} of {2} Items">
 
-    <GridColumn TItem="Category" HeaderText="@nameof(Category.Id)" PropertyName="@nameof(Category.Id)" SortKeySelector="item=>item.Id">
-        @context.Id
-    </GridColumn>
-    <GridColumn TItem="Category" HeaderText="@nameof(Category.Name)" PropertyName="@nameof(Category.Name)" SortKeySelector="item=>item.Name">
-        @context.Name
-    </GridColumn>
-    <GridColumn TItem="Category" HeaderText="@nameof(Category.Slug)" PropertyName="@nameof(Category.Slug)" SortKeySelector="item=>item.Slug">
-        @context.Slug
-    </GridColumn>
-    <GridColumn TItem="Category" HeaderText="Show On Navbar" PropertyName="@nameof(Category.ShowOnNavbar)" SortKeySelector="item=>item.ShowOnNavbar">
-        @if (context.ShowOnNavbar)
-        {
-            <Switch class="text-success" Label="Yes" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
-        }
-        else
-        {
-            <Switch Class="text-danger" Label="No" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
-        }
-    </GridColumn>
-    <GridColumn TItem="Category" HeaderText="Actions" Filterable="false">
-        <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button>
-        <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button>
-    </GridColumn>
-</Grid>
+        <GridColumn TItem="Category" HeaderText="@nameof(Category.Id)" PropertyName="@nameof(Category.Id)" SortKeySelector="item=>item.Id">
+            @context.Id
+        </GridColumn>
+        <GridColumn TItem="Category" HeaderText="@nameof(Category.Name)" PropertyName="@nameof(Category.Name)" SortKeySelector="item=>item.Name">
+            @context.Name
+        </GridColumn>
+        <GridColumn TItem="Category" HeaderText="@nameof(Category.Slug)" PropertyName="@nameof(Category.Slug)" SortKeySelector="item=>item.Slug">
+            @context.Slug
+        </GridColumn>
+        <GridColumn TItem="Category" HeaderText="Show On Navbar" PropertyName="@nameof(Category.ShowOnNavbar)" SortKeySelector="item=>item.ShowOnNavbar">
+            @if (context.ShowOnNavbar)
+            {
+                <Switch class="text-success" Label="Yes" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
+            }
+            else
+            {
+                <Switch Class="text-danger" Label="No" Value="context.ShowOnNavbar" ValueExpression="() => context.ShowOnNavbar" ValueChanged="@(()=>HandleShowOnNavbarAsync(context))" />
+            }
+        </GridColumn>
+        <GridColumn TItem="Category" HeaderText="Actions" Filterable="false">
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button>
+        </GridColumn>
+    </Grid>
 </div>

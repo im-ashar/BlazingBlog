@@ -57,7 +57,7 @@ namespace BlazingBlog.Services
 				{
 					UserName = AppConstants.AdminAccount.Username,
 					Email = AppConstants.AdminAccount.Email,
-					Name = AppConstants.AdminAccount.Name,
+					FullName = AppConstants.AdminAccount.Name,
 					EmailConfirmed = true,
 					LockoutEnabled = false
 				};

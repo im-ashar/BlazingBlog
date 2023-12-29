@@ -9,16 +9,13 @@ namespace BlazingBlog.Components.Pages.Admin
 {
     public partial class ManageCatergories
     {
-        private Modal modal = new Modal();
+        private Modal modal = default!;
         private Category? selectedCategory;
-        [Inject] protected ToastServiceExtended ToastService { get; set; }
-        [Inject] protected ICategoryService CategoryService { get; set; }
-        [Inject] protected NavigationManager NavigationManager { get; set; }
+        private Grid<Category> grid = default!;
+        [Inject] protected ToastService ToastService { get; set; } = default!;
+        [Inject] protected ICategoryService CategoryService { get; set; } = default!;
+        [Inject] protected NavigationManager NavigationManager { get; set; } = default!;
         private IEnumerable<Category> categories = default!;
-        protected override async Task OnInitializedAsync()
-        {
-            await LoadCategories();
-        }
         private async Task HandleShowOnNavbarAsync(Category category)
         {
             try
@@ -37,6 +34,7 @@ namespace BlazingBlog.Components.Pages.Admin
             try
             {
                 selectedCategory = category.Clone();
+                modal.Title = $"Edit {selectedCategory.Name}";
                 await HandleModal(true);
             }
             catch (Exception ex)
@@ -49,6 +47,7 @@ namespace BlazingBlog.Components.Pages.Admin
             try
             {
                 selectedCategory = new();
+                modal.Title = "Add New Category";
                 await HandleModal(true);
             }
             catch (Exception ex)
@@ -84,6 +83,8 @@ namespace BlazingBlog.Components.Pages.Admin
                     await CategoryService.SaveCategoryAsync(selectedCategory);
                     await LoadCategories();
                     await HandleModal(false);
+                    await grid.RefreshDataAsync();
+                    NavigationManager.Refresh();
                 }
             }
             catch (Exception ex)
@@ -108,6 +109,8 @@ namespace BlazingBlog.Components.Pages.Admin
             {
                 await CategoryService.DeleteCategoryAsync(category.Id);
                 await LoadCategories();
+                await grid.RefreshDataAsync();
+                NavigationManager.Refresh();
             }
             catch (Exception ex)
             {
@@ -120,7 +123,7 @@ namespace BlazingBlog.Components.Pages.Admin
             {
                 await LoadCategories();
             }
-            return await Task.FromResult(request.ApplyTo(categories));
+            return await Task.FromResult(request.ApplyTo(categories!));
         }
     }
 }

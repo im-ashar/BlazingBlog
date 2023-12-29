@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @inject ICategoryService CategoryService
 
 <nav class="navbar navbar-expand-lg fixed-top py-0">
@@ -17,7 +18,7 @@
                 @foreach (var category in _categories)
                 {
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="category">
+                        <NavLink data-enhance-nav="false" class="nav-link" href="@(category.Slug+"-posts")">
                             @category.Name
                         </NavLink>
                     </li>
@@ -29,7 +30,7 @@
                         <ul class="navbar-nav ms-auto d-flex align-items-center">
                             <li class="nav-item">
                                 <NavLink class="nav-link" href="admin/dashboard">
-                                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.GetNameOfUser()
+                                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true">@context.User.GetFullNameOfUser()</span>
                                 </NavLink>
                             </li>
                             <li class="nav-item">
@@ -53,11 +54,24 @@
     </div>
 </nav>
 @code {
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
     private Category[] _categories = [];
     private const int maxCategoriesToShowOnNavbar = 5;
 
     protected async override Task OnInitializedAsync()
     {
+        if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated)
+        {
+            var user = await UserManager.GetUserAsync(HttpContext.User);
+            if (user != null)
+            {
+                var additionalClaims = new List<Claim> { new Claim(AppConstants.ClaimNames.FullName, user.FullName) };
+                await SignInManager.SignInWithClaimsAsync(user, false, additionalClaims);
+            }
+        }
         await GetCategoriesToShowOnNavbar();
     }
 
