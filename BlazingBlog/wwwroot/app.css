@@ -59,3 +59,10 @@ a {
     background-size: cover;
     padding: 7rem 1rem;
 }
+.editor-wrapper {
+    height: 500px; /* Set your desired fixed height */
+}
+
+#QuillEditor {
+    height: 100%; /* Ensure the editor fills its container */
+}

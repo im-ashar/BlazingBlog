@@ -28,7 +28,7 @@
     </AdminHeader>
     <EditForm Model="model" FormName="blogPostForm" class="card shadow" OnValidSubmit="SaveBlogPostAsync">
         <DataAnnotationsValidator />
-        <div class="row card-body m-3">
+        <div class="row card-body m-1" style="height:75vh">
             <div class="col-sm-6">
                 <div class="mb-3">
                     <label for="@model.Title" class="form-label fw-bold">Title</label>
@@ -63,20 +63,32 @@
                 <ValidationMessage For="()=>model.Image" />
             </div>
             <div class="d-flex mb-3">
-                <label for="@model.IsFeatured" class="form-label me-3 fw-bold">Featured?</label>
-                <span>
-                    <Switch @bind-Value="model.IsFeatured" />
-                </span>
+                <div class="d-flex">
+                    <label for="@model.IsFeatured" class="form-label me-3 fw-bold">Featured?</label>
+                    <span>
+                        <Switch @bind-Value="model.IsFeatured" />
+                    </span>
+                </div>
+                <div class="d-flex">
+                    <label for="@model.IsPublished" class="form-label me-3 fw-bold">Published?</label>
+                    <span>
+                        <Switch @bind-Value="model.IsPublished" />
+                    </span>
+                </div>
             </div>
             <div class="d-flex mb-3">
-                <label for="@model.IsPublished" class="form-label me-3 fw-bold">Published?</label>
-                <span>
-                    <Switch @bind-Value="model.IsPublished" />
-                </span>
+                <Button Class="m-1 d-flex align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Success">
+                    <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+                    Save Changes
+                </Button>
+                <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center" data-enhance-nav="false">
+                    <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+                    Close
+                </a>
             </div>
         </div>
-        <div class="col-sm-6 d-flex">
-            <div class="mb-3 flex-grow-1">
+        <div class="col-sm-6">
+            <div class="mb-3 editor-wrapper">
                 <label class="form-label fw-bold">Content: </label>
                 <BlazoredTextEditor ToolbarCSSClass="form-control" EditorCssClass="form-control" @ref="@quillHtml" Placeholder="Enter Content...">
                     <ToolbarContent>
@@ -117,16 +129,7 @@
             </div>
         </div>
     </div>
-    <div class="m-3 d-flex">
-        <Button Class="m-1 d-flex align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Success">
-            <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-            Save Changes
-        </Button>
-        <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center" data-enhance-nav="false">
-            <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-            Close
-        </a>
-    </div>
+
 </EditForm>
 
 @code {
