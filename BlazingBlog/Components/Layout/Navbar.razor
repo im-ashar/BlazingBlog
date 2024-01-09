@@ -18,7 +18,7 @@
                 @foreach (var category in _categories)
                 {
                     <li class="nav-item">
-                        <NavLink data-enhance-nav="false" class="nav-link" href="@(category.Slug+"-posts")">
+                        <NavLink class="nav-link" href="@(category.Slug+"-posts")">
                             @category.Name
                         </NavLink>
                     </li>

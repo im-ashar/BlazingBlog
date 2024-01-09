@@ -13,7 +13,7 @@
 </style>
 <AdminHeader Title="Manage BlogPosts">
     <ActionButtons>
-        <a href="/admin/manage-posts/new" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center" data-enhance-nav="false">
+        <a href="/admin/manage-posts/new" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center">
             <Icon Name="IconName.PlusCircleFill" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
             Add New Blog Post
         </a>
@@ -119,7 +119,7 @@
             }
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="Actions" Filterable="false">
-            <a href="/admin/manage-posts/edit/@context.Id" data-enhance-nav="false" class="btn btn-info btn-sm">Edit</a>
+            <a href="/admin/manage-posts/edit/@context.Id" class="btn btn-info btn-sm">Edit</a>
             <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>HandleDeleteModal(true,context)">Delete</Button>
         </GridColumn>
     </Grid>

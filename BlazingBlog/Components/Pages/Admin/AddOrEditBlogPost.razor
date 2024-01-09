@@ -1,7 +1,7 @@
 ﻿@page "/admin/manage-posts/new"
 @page "/admin/manage-posts/edit/{id:int?}"
 <PageTitle>@dashboardHeaderTitle</PageTitle>
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @inject IBlogPostAdminService BlogPostAdminService
 @inject ICategoryService CategoryService
@@ -81,7 +81,7 @@
                     <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
                     Save Changes
                 </Button>
-                <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center" data-enhance-nav="false">
+                <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center">
                     <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
                     Close
                 </a>
