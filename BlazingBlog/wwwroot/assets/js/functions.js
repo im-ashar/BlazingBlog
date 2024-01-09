@@ -26,3 +26,22 @@ function togglePasswordVisibility() {
         passwordIcon.classList.add("bi-eye-slash");
     }
 }
+
+let storedURL = window.location.href;
+
+// Function to check for URL changes and reset scroll position
+function checkURLChange() {
+    if (window.location.href !== storedURL) {
+        // URL has changed, reset scroll position
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        // Update storedURL with the new URL
+        storedURL = window.location.href;
+    }
+}
+
+// Check for URL changes every 500 milliseconds (adjust as needed)
+setInterval(checkURLChange, 10);
+
+
