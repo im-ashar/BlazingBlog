@@ -76,10 +76,10 @@
           ItemsPerPageText="Select Number Of Items To Show"
           PaginationItemsTextFormat="{0} - {1} of {2} Items">
 
-        <GridColumn TItem="BlogPost" HeaderText="@nameof(BlogPost.Id)" PropertyName="@nameof(BlogPost.Id)" SortString="@nameof(BlogPost.Id)" SortKeySelector="item=>item.Id" IsDefaultSortColumn="true">
+        <GridColumn TItem="BlogPost" Sortable="true" HeaderText="@nameof(BlogPost.Id)" PropertyName="@nameof(BlogPost.Id)" SortString="@nameof(BlogPost.Id)" SortKeySelector="item=>item.Id" IsDefaultSortColumn="true">
             @context.Id
         </GridColumn>
-        <GridColumn TItem="BlogPost" HeaderText="@nameof(BlogPost.Title)" PropertyName="@nameof(BlogPost.Title)" SortString="@nameof(BlogPost.Title)" SortKeySelector="item=>item.Title">
+        <GridColumn TItem="BlogPost" Sortable="true" HeaderText="@nameof(BlogPost.Title)" PropertyName="@nameof(BlogPost.Title)" SortString="@nameof(BlogPost.Title)" SortKeySelector="item=>item.Title">
             <div class="py-2" style="display:grid; grid-template-columns: 60px auto; grid-column-gap:10px;">
                 <img src="@context.Image" style="height:60px; width:60px;object-fit:cover" />
                 <div>
@@ -95,10 +95,10 @@
                 </div>
             </div>
         </GridColumn>
-        <GridColumn TItem="BlogPost" HeaderText="Category Name" PropertyName="@nameof(BlogPost.Category.Name)" SortString="@nameof(BlogPost.Category.Name)" SortKeySelector="item=>item.Category.Name">
+        <GridColumn TItem="BlogPost" Sortable="true" HeaderText="@nameof(BlogPost.Category)" PropertyName="@nameof(BlogPost.Category.Name)" SortString="@nameof(BlogPost.Category)" SortKeySelector="item=>item.Category.Name">
             @context.Category.Name
         </GridColumn>
-        <GridColumn TItem="BlogPost" HeaderText="Featured?" PropertyName="@nameof(BlogPost.IsFeatured)" SortString="@nameof(BlogPost.IsFeatured)" SortKeySelector="item=>item.IsFeatured">
+        <GridColumn TItem="BlogPost" Sortable="true" HeaderText="Featured?" PropertyName="@nameof(BlogPost.IsFeatured)" SortString="@nameof(BlogPost.IsFeatured)" SortKeySelector="item=>item.IsFeatured">
             @if (context.IsFeatured)
             {
                 <Switch class="text-success" Label="Yes" Value="context.IsFeatured" ValueExpression="() => context.IsFeatured" ValueChanged="@(()=>HandleIsFeaturedAsync(context))" />
@@ -108,7 +108,7 @@
                 <Switch Class="text-danger" Label="No" Value="context.IsFeatured" ValueExpression="() => context.IsFeatured" ValueChanged="@(()=>HandleIsFeaturedAsync(context))" />
             }
         </GridColumn>
-        <GridColumn TItem="BlogPost" HeaderText="Published?" PropertyName="@nameof(BlogPost.IsPublished)" SortString="@nameof(BlogPost.IsPublished)" SortKeySelector="item=>item.IsPublished">
+        <GridColumn TItem="BlogPost" Sortable="true" HeaderText="Published?" PropertyName="@nameof(BlogPost.IsPublished)" SortString="@nameof(BlogPost.IsPublished)" SortKeySelector="item=>item.IsPublished">
             @if (context.IsPublished)
             {
                 <Switch class="text-success" Label="Yes" Value="context.IsPublished" ValueExpression="() => context.IsPublished" ValueChanged="@(()=>HandleIsPublishedAsync(context))" />

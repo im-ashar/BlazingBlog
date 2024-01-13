@@ -19,12 +19,22 @@ namespace BlazingBlog.Services
     public class BlogPostAdminService : IBlogPostAdminService
     {
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
-        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        private static readonly Dictionary<string, Expression<Func<BlogPost, object>>> OrderFunctions =
+        new Dictionary<string, Expression<Func<BlogPost, object>>>
+        {
+            { nameof(BlogPost.Id), x => x.Id },
+            { nameof(BlogPost.Title), x => x.Title },
+            { nameof(BlogPost.Category), x => x.Category.Name },
+            { nameof(BlogPost.IsPublished), x => x.IsPublished },
+            { nameof(BlogPost.IsFeatured), x => x.IsFeatured }
+        };
 
         public BlogPostAdminService(IDbContextFactory<ApplicationDbContext> contextFactory, IWebHostEnvironment webHostEnvironment)
         {
             _contextFactory = contextFactory;
-            this.webHostEnvironment = webHostEnvironment;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         private async Task<TResult> ExecuteOnContext<TResult>(Func<ApplicationDbContext, Task<TResult>> query)
@@ -68,53 +78,55 @@ namespace BlazingBlog.Services
             });
         }
 
-        private static async Task<BlogPost[]> SortByAscendingWhenFiltersAreNotApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, BlogPost[] blogPosts)
+        private async Task<BlogPost[]> SortByAscendingWhenFiltersAreNotApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, BlogPost[] blogPosts)
         {
             blogPosts = await context.BlogPosts.AsNoTracking()
-                                                                       .Include(b => b.Category)
-                                                                       .OrderBy(_ => sortKey)
-                                                                       .Skip((pageNumber - 1) * pageSize)
-                                                                       .Take(pageSize)
-                                                                       .ToArrayAsync();
+                                               .Include(b => b.Category)
+                                               .OrderBy(OrderFunctions[sortKey])
+                                               .Skip((pageNumber - 1) * pageSize)
+                                               .Take(pageSize)
+                                               .ToArrayAsync();
             return blogPosts;
         }
 
-        private static async Task<BlogPost[]> SortByDescendingWhenFiltersAreNotApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, BlogPost[] blogPosts)
+        private async Task<BlogPost[]> SortByDescendingWhenFiltersAreNotApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, BlogPost[] blogPosts)
         {
             blogPosts = await context.BlogPosts.AsNoTracking()
-                                                                       .Include(b => b.Category)
-                                                                       .OrderByDescending(_ => sortKey)
-                                                                       .Skip((pageNumber - 1) * pageSize)
-                                                                       .Take(pageSize)
-                                                                       .ToArrayAsync();
+                                               .Include(b => b.Category)
+                                               .OrderByDescending(OrderFunctions[sortKey])
+                                               .Skip((pageNumber - 1) * pageSize)
+                                               .Take(pageSize)
+                                               .ToArrayAsync();
             return blogPosts;
         }
 
-        private static void SortByAscendingWhenFiltersAreApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, out BlogPost[] blogPosts, out int totalRecords, Expression<Func<BlogPost, bool>> lambda)
+        private void SortByAscendingWhenFiltersAreApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, out BlogPost[] blogPosts, out int totalRecords, Expression<Func<BlogPost, bool>> lambda)
         {
+            var propertyInfo = typeof(BlogPost).GetProperty(sortKey);
             totalRecords = context.BlogPosts.AsNoTracking().Include(b => b.Category).Where(lambda!.Compile()).Count();
             blogPosts = context.BlogPosts.AsNoTracking()
                                          .Include(b => b.Category)
                                          .Where(lambda.Compile())
-                                         .OrderBy(_ => sortKey)
+                                         .OrderBy(b => propertyInfo!.GetValue(b))
                                          .Skip((pageNumber - 1) * pageSize)
                                          .Take(pageSize)
                                          .ToArray();
         }
 
-        private static void SortByDescendingWhenFiltersAreApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, out BlogPost[] blogPosts, out int totalRecords, Expression<Func<BlogPost, bool>> lambda)
+        private void SortByDescendingWhenFiltersAreApplied(int pageNumber, int pageSize, string sortKey, ApplicationDbContext context, out BlogPost[] blogPosts, out int totalRecords, Expression<Func<BlogPost, bool>> lambda)
         {
+            var propertyInfo = typeof(BlogPost).GetProperty(sortKey);
             totalRecords = context.BlogPosts.AsNoTracking().Include(b => b.Category).Where(lambda!.Compile()).Count();
             blogPosts = context.BlogPosts.AsNoTracking()
                                          .Include(b => b.Category)
                                          .Where(lambda.Compile())
-                                         .OrderByDescending(_ => sortKey)
+                                         .OrderByDescending(b => propertyInfo!.GetValue(b))
                                          .Skip((pageNumber - 1) * pageSize)
                                          .Take(pageSize)
                                          .ToArray();
         }
 
-        private static Expression<Func<BlogPost, bool>> ApplyFilters(IEnumerable<FilterItem> filters)
+        private Expression<Func<BlogPost, bool>> ApplyFilters(IEnumerable<FilterItem> filters)
         {
             var parameterExpression = Expression.Parameter(typeof(BlogPost)); // second param optional
             Expression<Func<BlogPost, bool>> lambda = null!;
@@ -201,16 +213,16 @@ namespace BlazingBlog.Services
             {
                 if (string.IsNullOrWhiteSpace(existingBlogPost.Image))
                 {
-                    existingBlogPost.Image = await blogPost.ImageFile.SaveFileToDiskAsync(webHostEnvironment);
+                    existingBlogPost.Image = await blogPost.ImageFile.SaveFileToDiskAsync(_webHostEnvironment);
                 }
                 else
                 {
-                    var existingImagePath = Path.Combine(webHostEnvironment.WebRootPath, existingBlogPost.Image);
+                    var existingImagePath = Path.Combine(_webHostEnvironment.WebRootPath, existingBlogPost.Image);
                     if (File.Exists(existingImagePath))
                     {
                         File.Delete(existingImagePath);
                     }
-                    existingBlogPost.Image = await blogPost.ImageFile.SaveFileToDiskAsync(webHostEnvironment);
+                    existingBlogPost.Image = await blogPost.ImageFile.SaveFileToDiskAsync(_webHostEnvironment);
                 }
             }
         }
@@ -229,7 +241,7 @@ namespace BlazingBlog.Services
             {
                 blogPost.PublishedAt = DateTime.UtcNow;
             }
-            blogPost.Image = await blogPost.ImageFile!.SaveFileToDiskAsync(webHostEnvironment);
+            blogPost.Image = await blogPost.ImageFile!.SaveFileToDiskAsync(_webHostEnvironment);
             await context.BlogPosts.AddAsync(blogPost);
         }
 
