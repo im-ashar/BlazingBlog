@@ -3,6 +3,7 @@ using BlazingBlog.Components.Pages.Account.Identity;
 using BlazingBlog.Data;
 using BlazingBlog.Services;
 using BlazingBlog.Utilities;
+using dotenv.net;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-
+DotEnv.Load();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 var prodConnectionString = Environment.GetEnvironmentVariable("PROD_CONN_STRING");
 if (!string.IsNullOrEmpty(prodConnectionString))
