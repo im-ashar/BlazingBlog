@@ -32,6 +32,10 @@ if (!string.IsNullOrEmpty(prodConnectionString))
     Console.WriteLine("Using production connection string");
     connectionString = prodConnectionString;
 }
+else
+{
+    Console.WriteLine("Using development connection string");
+}
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 options.UseNpgsql(connectionString));
 
