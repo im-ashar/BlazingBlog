@@ -25,8 +25,32 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+
+var env = Environment.GetEnvironmentVariable("ENVIRONMENT");
+if (!string.IsNullOrEmpty(env) && env == "PRODUCTION")
+{
+    var PGHOST = Environment.GetEnvironmentVariable("PGHOST");
+    var PGPORT = Environment.GetEnvironmentVariable("PGPORT");
+    var PGDATABASE = Environment.GetEnvironmentVariable("PGDATABASE");
+    var PGUSER = Environment.GetEnvironmentVariable("PGUSER");
+    var PGPASSWORD = Environment.GetEnvironmentVariable("PGPASSWORD");
+
+    if (string.IsNullOrEmpty(PGHOST) || string.IsNullOrEmpty(PGPORT) || string.IsNullOrEmpty(PGDATABASE) || string.IsNullOrEmpty(PGUSER) || string.IsNullOrEmpty(PGPASSWORD))
+    {
+        throw new InvalidOperationException("Database Environment Variables Not Set");
+    }
+    connectionString = $"Server={PGHOST};Port={PGPORT};Database={PGDATABASE};User Id={PGUSER};Password={PGPASSWORD}";
+
+    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
+}
+else
+{
+    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
+
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
