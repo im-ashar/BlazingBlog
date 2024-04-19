@@ -40,15 +40,9 @@ if (!string.IsNullOrEmpty(env) && env == "PRODUCTION")
         throw new InvalidOperationException("Database Environment Variables Not Set");
     }
     connectionString = $"Server={PGHOST};Port={PGPORT};Database={PGDATABASE};User Id={PGUSER};Password={PGPASSWORD}";
-
-    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
 }
-else
-{
-    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-        options.UseSqlServer(connectionString));
-}
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+options.UseNpgsql(connectionString));
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
