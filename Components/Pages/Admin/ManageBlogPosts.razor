@@ -120,7 +120,7 @@
         </GridColumn>
         <GridColumn TItem="BlogPost" HeaderText="Actions" Filterable="false">
             <a href="/admin/manage-posts/edit/@context.Id" class="btn btn-info btn-sm">Edit</a>
-            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>HandleDeleteModal(true,context)">Delete</Button>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="ButtonSize.Small" @onclick="()=>HandleDeleteModal(true,context)">Delete</Button>
         </GridColumn>
     </Grid>
 </div>
