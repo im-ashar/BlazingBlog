@@ -3,7 +3,7 @@
 <title>Manage Categories</title>
 <AdminHeader Title="Manage Catergories">
     <ActionButtons>
-        <Button Class="d-flex justify-content-center align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Primary" Size="Size.Small" @onclick="()=>HandleNewCategory()">
+        <Button Class="d-flex justify-content-center align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="()=>HandleNewCategory()">
             <Icon Name="IconName.PlusCircleFill" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
             <span>Add New Category</span>
         </Button>
@@ -62,8 +62,8 @@
             }
         </GridColumn>
         <GridColumn TItem="Category" HeaderText="Actions" Filterable="false">
-            <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="Size.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button>
-            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="Size.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Info" Size="ButtonSize.Small" @onclick="()=>HandleEditCategory(context)">Edit</Button>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Danger" Size="ButtonSize.Small" @onclick="()=>DeleteCategoryAsync(context)">Delete</Button>
         </GridColumn>
     </Grid>
 </div>

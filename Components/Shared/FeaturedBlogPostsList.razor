@@ -1,56 +1,59 @@
 ﻿<div class="container pt-4 pb-4">
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="card border-1 mb-4 shadow h-100">
-                <div class="border border-dark h-75 rounded rounded-2" style="background-image: url(@_second.Image); background-size: cover; background-repeat: no-repeat;margin:3%">
-                </div>
-                <div class="card-body pb-0 m-2 d-flex flex-column align-items-start">
-                    <h2 class="h4 fw-bold">
-                        <a class="text-dark" href="/posts/@_second.Slug">@_second.Title</a>
-                    </h2>
-                    <p class="card-text">
-                        @_second.Introduction
-                    </p>
-                    <div>
-                        <small class="d-block">@_second.User.FullName</small>
-                        <small class="text-muted">@_second.PublishedAt.ToDisplay()</small>
+    @if (_second is not null)
+    {
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card border-1 mb-4 shadow h-100">
+                    <div class="border border-dark h-75 rounded rounded-2" style="background-image: url(@_second.Image); background-size: cover; background-repeat: no-repeat;margin:3%">
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card border-1 mb-4 shadow h-100">
-
-                @foreach (var post in Posts.Skip(2))
-                {
-                    <div class="mb-3 p-3 d-flex align-items-center">
-                        <img class="border-dark border rounded rounded-2" style="height:150px;width:40%;object-fit:cover" src="@post.Image">
-                        <div class="ps-3">
-                            <h2 class="mb-2 h6 fw-bold">
-                                <a class="text-dark" href="/posts/@post.Slug">@post.Title</a>
-                            </h2>
-                            <div class="card-text text-muted small">
-                                @post.User.FullName in <a href="@post.Category.Slug-posts" title="@post.Category.Name Posts">@post.Category.Name</a>
-                            </div>
-                            <small class="text-muted">@post.PublishedAt.ToDisplay()</small>
+                    <div class="card-body pb-0 m-2 d-flex flex-column align-items-start">
+                        <h2 class="h4 fw-bold">
+                            <a class="text-dark" href="/posts/@_second.Slug">@_second.Title</a>
+                        </h2>
+                        <p class="card-text">
+                            @_second.Introduction
+                        </p>
+                        <div>
+                            <small class="d-block">@_second.User.FullName</small>
+                            <small class="text-muted">@_second.PublishedAt.ToDisplay()</small>
                         </div>
                     </div>
-                }
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-1 mb-4 shadow h-100">
+
+                    @foreach (var post in Posts.Skip(2))
+                    {
+                        <div class="mb-3 p-3 d-flex align-items-center">
+                            <img class="border-dark border rounded rounded-2" style="height:150px;width:40%;object-fit:cover" src="@post.Image">
+                            <div class="ps-3">
+                                <h2 class="mb-2 h6 fw-bold">
+                                    <a class="text-dark" href="/posts/@post.Slug">@post.Title</a>
+                                </h2>
+                                <div class="card-text text-muted small">
+                                    @post.User.FullName in <a href="@post.Category.Slug-posts" title="@post.Category.Name Posts">@post.Category.Name</a>
+                                </div>
+                                <small class="text-muted">@post.PublishedAt.ToDisplay()</small>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
+    }
 </div>
 @code {
     [Parameter, EditorRequired]
     public BlogPost[] Posts { get; set; } = [];
 
-    private BlogPost _second = default!;
+    private BlogPost? _second = default;
 
     protected override void OnInitialized()
     {
         if (Posts.Length > 0)
         {
-            _second = Posts.Skip(1).First();
+            _second = Posts.Skip(1).FirstOrDefault();
         }
     }
 }

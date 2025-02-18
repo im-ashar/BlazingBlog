@@ -3,7 +3,6 @@ using BlazingBlog.Components.Pages.Account.Identity;
 using BlazingBlog.Data;
 using BlazingBlog.Services;
 using BlazingBlog.Utilities;
-using dotenv.net;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,18 +24,8 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-DotEnv.Load();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-var prodConnectionString = Environment.GetEnvironmentVariable("PROD_CONN_STRING");
-if (!string.IsNullOrEmpty(prodConnectionString))
-{
-    Console.WriteLine("Using production connection string");
-    connectionString = prodConnectionString;
-}
-else
-{
-    Console.WriteLine("Using development connection string");
-}
+
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 options.UseNpgsql(connectionString));
 
@@ -88,7 +77,7 @@ app.Run();
 
 static async Task SeedAsync(IServiceProvider services)
 {
-    var scope = services.CreateScope();
+    using var scope = services.CreateScope();
     var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
     await seedDataService.SeedDataAsync();
 }

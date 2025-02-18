@@ -9,116 +9,123 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-    <AdminHeader Title="@dashboardHeaderTitle">
-        <ActionButtons>
-            <a href="/admin/manage-posts" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center">
-                <Icon Name="IconName.ArrowLeft" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-                Back To Manage Blog Posts
-            </a>
-        </ActionButtons>
-    </AdminHeader>
-    <EditForm Model="model" FormName="blogPostForm" class="card shadow" OnValidSubmit="SaveBlogPostAsync">
-        <DataAnnotationsValidator />
-        <div class="row card-body m-1" style="height:75vh">
-            <div class="col-sm-6">
-                <div class="mb-3">
-                    <label for="@model.Title" class="form-label fw-bold">Title</label>
-                    <InputText @bind-Value="model.Title" class="form-control" placeholder="Blog Post Title" />
-                    <ValidationMessage For="()=>model.Title" />
-                </div>
-                <div class="mb-3">
-                    <label for="@model.Title" class="form-label fw-bold">Category</label>
-                    <InputSelect @bind-Value="model.CategoryId" class="form-control" placeholder="Select A Category">
-                        <option value="0">Select A Category</option>
-                        @foreach (var category in categories)
+<AdminHeader Title="@dashboardHeaderTitle">
+    <ActionButtons>
+        <a href="/admin/manage-posts" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center">
+            <Icon Name="IconName.ArrowLeft" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+            Back To Manage Blog Posts
+        </a>
+    </ActionButtons>
+</AdminHeader>
+<EditForm Model="model" FormName="blogPostForm" class="card shadow" OnValidSubmit="SaveBlogPostAsync">
+    <DataAnnotationsValidator />
+    <div class="row card-body m-1">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-sm-6 d-flex flex-column justify-content-around">
+                    <div class="mb-3">
+                        <label for="@model.Title" class="form-label fw-bold">Title</label>
+                        <InputText @bind-Value="model.Title" class="form-control" placeholder="Blog Post Title" />
+                        <ValidationMessage For="()=>model.Title" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="@model.Title" class="form-label fw-bold">Category</label>
+                        <InputSelect @bind-Value="model.CategoryId" class="form-control" placeholder="Select A Category">
+                            <option value="0">Select A Category</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="()=>model.CategoryId" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="@model.Introduction" class="form-label fw-bold">Introduction</label>
+                        <InputText @bind-Value="model.Introduction" class="form-control" placeholder="Blog Post Introduction" />
+                        <ValidationMessage For="()=>model.Introduction" />
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(imageUrl))
                     {
-                        <option value="@category.Id">@category.Name</option>
+                        <div class="mb-3">
+                            <img src="@imageUrl" class="img-fluid" style="height:200px" />
+                        </div>
                     }
-                </InputSelect>
-                <ValidationMessage For="()=>model.CategoryId" />
-            </div>
-            <div class="mb-3">
-                <label for="@model.Introduction" class="form-label fw-bold">Introduction</label>
-                <InputText @bind-Value="model.Introduction" class="form-control" placeholder="Blog Post Introduction" />
-                <ValidationMessage For="()=>model.Introduction" />
-            </div>
-            @if (!string.IsNullOrWhiteSpace(imageUrl))
-            {
-                <div class="mb-3">
-                    <img src="@imageUrl" class="img-fluid" style="height:200px" />
+                    <div class="mb-3">
+                        <label for="@model.ImageFile" class="form-label fw-bold">Upload An Image</label>
+                        <InputFile class="form-control mb-3" @bind-Value="model.ImageFile" OnChange="HandleUploadFileAsync" />
+                        <ValidationMessage For="()=>model.Image" />
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="d-flex">
+                            <label for="@model.IsFeatured" class="form-label me-3 fw-bold">Featured?</label>
+                            <span>
+                                <Switch @bind-Value="model.IsFeatured" />
+                            </span>
+                        </div>
+                        <div class="d-flex">
+                            <label for="@model.IsPublished" class="form-label me-3 fw-bold">Published?</label>
+                            <span>
+                                <Switch @bind-Value="model.IsPublished" />
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            }
-            <div class="mb-3">
-                <label for="@model.ImageFile" class="form-label fw-bold">Upload An Image</label>
-                <InputFile class="form-control mb-3" @bind-Value="model.ImageFile" OnChange="HandleUploadFileAsync" />
-                <ValidationMessage For="()=>model.Image" />
-            </div>
-            <div class="d-flex mb-3">
-                <div class="d-flex">
-                    <label for="@model.IsFeatured" class="form-label me-3 fw-bold">Featured?</label>
-                    <span>
-                        <Switch @bind-Value="model.IsFeatured" />
-                    </span>
+                <div class="col-sm-6">
+                    <div class="mb-3 editor-wrapper">
+                        <label class="form-label fw-bold">Content: </label>
+                        <BlazoredTextEditor ToolbarCSSClass="form-control" EditorCssClass="form-control" @ref="@quillHtml" Placeholder="Enter Content...">
+                            <ToolbarContent>
+                                <select class="ql-header">
+                                    <option selected=""></option>
+                                    <option value="1"></option>
+                                    <option value="2"></option>
+                                    <option value="3"></option>
+                                    <option value="4"></option>
+                                    <option value="5"></option>
+                                </select>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                    <button class="ql-strike"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-list" value="ordered"></button>
+                                    <button class="ql-list" value="bullet"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-link"></button>
+                                </span>
+                            </ToolbarContent>
+                            <EditorContent>
+                                @((MarkupString)editorContent)
+                            </EditorContent>
+                        </BlazoredTextEditor>
+                        @if (!string.IsNullOrWhiteSpace(emptyContentError))
+                        {
+                            <div class="validation-message">@emptyContentError</div>
+                        }
+                    </div>
                 </div>
-                <div class="d-flex">
-                    <label for="@model.IsPublished" class="form-label me-3 fw-bold">Published?</label>
-                    <span>
-                        <Switch @bind-Value="model.IsPublished" />
-                    </span>
-                </div>
             </div>
-            <div class="d-flex mb-3">
-                <Button Class="m-1 d-flex align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Success">
-                    <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-                    Save Changes
-                </Button>
-                <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center">
-                    <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-                    Close
-                </a>
+            <div class="row">
+                <div class="d-flex mb-3">
+                    <Button Class="m-1 d-flex align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Success">
+                        <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+                        Save Changes
+                    </Button>
+                    <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center">
+                        <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
+                        Close
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="mb-3 editor-wrapper">
-                <label class="form-label fw-bold">Content: </label>
-                <BlazoredTextEditor ToolbarCSSClass="form-control" EditorCssClass="form-control" @ref="@quillHtml" Placeholder="Enter Content...">
-                    <ToolbarContent>
-                        <select class="ql-header">
-                            <option selected=""></option>
-                            <option value="1"></option>
-                            <option value="2"></option>
-                            <option value="3"></option>
-                            <option value="4"></option>
-                            <option value="5"></option>
-                        </select>
-                        <span class="ql-formats">
-                            <button class="ql-bold"></button>
-                            <button class="ql-italic"></button>
-                            <button class="ql-underline"></button>
-                            <button class="ql-strike"></button>
-                        </span>
-                        <span class="ql-formats">
-                            <select class="ql-color"></select>
-                            <select class="ql-background"></select>
-                        </span>
-                        <span class="ql-formats">
-                            <button class="ql-list" value="ordered"></button>
-                            <button class="ql-list" value="bullet"></button>
-                        </span>
-                        <span class="ql-formats">
-                            <button class="ql-link"></button>
-                        </span>
-                    </ToolbarContent>
-                    <EditorContent>
-                        @((MarkupString)editorContent)
-                    </EditorContent>
-                </BlazoredTextEditor>
-                @if (!string.IsNullOrWhiteSpace(emptyContentError))
-                {
-                    <div class="validation-message">@emptyContentError</div>
-                }
-            </div>
-        </div>
+
     </div>
 
 </EditForm>
