@@ -9,7 +9,7 @@
         <div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
             <div class="h-100 tofront">
                 <div class="row justify-content-between">
-                    <div class="col-md-6 pt-6 pb-6 pr-6 align-self-center">
+                    <div class="col-md-6 pt-3 pb-2 pr-6 align-self-center">
                         <p class="text-uppercase fw-bold">
                             <a class="text-danger" href="@_blogPost.Category.Name-posts">@_blogPost.Category.Name</a>
                         </p>
@@ -17,14 +17,14 @@
                         <p class="mb-3">
                             @_blogPost.Introduction
                         </p>
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle" src="https://ui-avatars.com/api/?name=@HttpUtility.UrlEncode(_blogPost.User.FullName)&background=random" width="70">
-                            <small class="ml-2">
+                        <div class="d-flex align-items-center pt-4">
+                            <img class="rounded-circle" style="width:12%" src="https://ui-avatars.com/api/?name=@HttpUtility.UrlEncode(_blogPost.User.FullName)&background=random" width="70">
+                            <small class="ps-3">
                                 @_blogPost.User.FullName <span class="text-muted d-block">@_blogPost.PublishedAt.ToDisplay()</span>
                             </small>
                         </div>
                     </div>
-                    <div class="col-md-6 pt-6 pb-6 pr-6 align-self-center">
+                    <div class="col-md-6 pt-3 pb-2 pr-6 align-self-center">
                         <img src="@_blogPost.Image">
                     </div>
                 </div>

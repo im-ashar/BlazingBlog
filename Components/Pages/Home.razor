@@ -3,6 +3,15 @@
 @inject IBlogPostService BlogPostService
 
 <PageTitle>Home</PageTitle>
+@if (noPostsToShow)
+{
+    <div class="container pt-4">
+        <div class="alert alert-warning text-center fw-bolder" role="alert">
+            No Posts Available
+        </div>
+    </div>
+}
+
 @if (_first is not null)
 {
     <div class="container card shadow border border-1 rounded rounded-2 bg-lightblue">
@@ -30,9 +39,9 @@
 <div class="container">
     <div class="row justify-content-between">
         <div class="col-md-8">
-            <h5 class="fw-bold spanborder"><span>Recently Published</span></h5>
             @if (_recent.Length > 0)
             {
+                <h5 class="fw-bold spanborder"><span>Recently Published</span></h5>
                 <BlogPostsList Posts="_recent" />
             }
         </div>
@@ -47,8 +56,8 @@
     private BlogPost[] _featured = [];
     private BlogPost[] _popular = [];
     private BlogPost[] _recent = [];
-    private BlogPost _first = default!;
-
+    private BlogPost? _first = default;
+    private bool noPostsToShow = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -58,9 +67,10 @@
            BlogPostService.GetPopularBlogPostsAsync(4),
            BlogPostService.GetRecentBlogPostsAsync(5)
         );
+        noPostsToShow = !posts.Any(ar => ar.Length > 0);
         _featured = posts[0];
         _popular = posts[1];
         _recent = posts[2];
-        _first = _featured.First();
+        _first = _featured.FirstOrDefault();
     }
 }

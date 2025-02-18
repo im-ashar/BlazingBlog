@@ -64,5 +64,6 @@ a {
 }
 
 #QuillEditor {
-    height: 100%; /* Ensure the editor fills its container */
+    overflow-y: scroll;
+    max-height: 80%;
 }
