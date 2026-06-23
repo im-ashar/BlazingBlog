@@ -1,0 +1,139 @@
+name: Deploy to MonsterASP
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-monsterasp
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore NuGet packages
+        run: dotnet restore BlazingBlog.csproj
+
+      - name: Build Tailwind CSS
+        run: |
+          npm install --no-save @tailwindcss/cli
+          npx @tailwindcss/cli -i wwwroot/app.tailwind.css -o wwwroot/app.css --minify
+
+      - name: Publish application
+        run: dotnet publish BlazingBlog.csproj -c Release -o ./publish -p:SkipTailwindBuild=true --no-restore
+
+      - name: Inject production connection string
+        env:
+          CONNECTION_STRING: ${{ secrets.DEFAULT_CONNECTION_STRING }}
+        run: |
+          if [ -z "$CONNECTION_STRING" ]; then
+            echo "::error::Secret DEFAULT_CONNECTION_STRING is not set."
+            exit 1
+          fi
+          # Overwrite (or create) appsettings.Production.json with secrets-only overrides.
+          # ASP.NET Core layers it on top of appsettings.json at runtime.
+          python3 - <<'PY'
+          import json, os
+          cfg = {
+              "ConnectionStrings": {
+                  "DefaultConnection": os.environ["CONNECTION_STRING"]
+              }
+          }
+          with open("./publish/appsettings.Production.json", "w", encoding="utf-8") as f:
+              json.dump(cfg, f, indent=2)
+          print("Wrote ./publish/appsettings.Production.json")
+          PY
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Take application offline
+        env:
+          SFTP_PASSWORD: ${{ secrets.MONSTERASP_FTP_PASSWORD }}
+          SFTP_USER: ${{ secrets.MONSTERASP_FTP_USERNAME }}
+          SFTP_HOST: ${{ secrets.MONSTERASP_FTP_SERVER }}
+          SFTP_DIR: ${{ secrets.MONSTERASP_FTP_SERVER_DIR || '/wwwroot' }}
+        run: |
+          cat > ./app_offline.htm <<'HTML'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <title>Deploying — BlazingBlog</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <style>
+              body { font-family: 'Inter', system-ui, sans-serif; background: #fafafa; color: #0a0a0a;
+                     display: grid; place-items: center; min-height: 100vh; margin: 0; }
+              .card { max-width: 32rem; padding: 2.5rem; text-align: center; }
+              .pill { display: inline-block; padding: .25rem .75rem; border-radius: 9999px;
+                      background: #00d4a4; color: #0a0a0a; font-weight: 600; font-size: .75rem;
+                      letter-spacing: .05em; text-transform: uppercase; }
+              h1 { font-size: 2rem; margin: 1rem 0 .5rem; }
+              p { color: #5a5a5c; line-height: 1.6; }
+            </style>
+          </head>
+          <body>
+            <main class="card">
+              <span class="pill">Deploying</span>
+              <h1>We're shipping new stuff</h1>
+              <p>BlazingBlog is briefly offline while we deploy the latest version. Refresh in a few seconds.</p>
+            </main>
+          </body>
+          </html>
+          HTML
+          lftp -c "set sftp:auto-confirm yes; \
+                   open -u $SFTP_USER,$SFTP_PASSWORD sftp://$SFTP_HOST:22; \
+                   put -O $SFTP_DIR ./app_offline.htm"
+          sleep 5
+
+      - name: Deploy via SFTP
+        env:
+          SFTP_PASSWORD: ${{ secrets.MONSTERASP_FTP_PASSWORD }}
+          SFTP_USER: ${{ secrets.MONSTERASP_FTP_USERNAME }}
+          SFTP_HOST: ${{ secrets.MONSTERASP_FTP_SERVER }}
+          SFTP_DIR: ${{ secrets.MONSTERASP_FTP_SERVER_DIR || '/wwwroot' }}
+        run: |
+          cd ./publish
+          lftp -c "set sftp:auto-confirm yes; \
+                   set mirror:set-permissions no; \
+                   open -u $SFTP_USER,$SFTP_PASSWORD sftp://$SFTP_HOST:22; \
+                   mirror -R --transfer-all --verbose --exclude-glob app_offline.htm . $SFTP_DIR"
+
+      - name: Bring application online
+        if: always()
+        env:
+          SFTP_PASSWORD: ${{ secrets.MONSTERASP_FTP_PASSWORD }}
+          SFTP_USER: ${{ secrets.MONSTERASP_FTP_USERNAME }}
+          SFTP_HOST: ${{ secrets.MONSTERASP_FTP_SERVER }}
+          SFTP_DIR: ${{ secrets.MONSTERASP_FTP_SERVER_DIR || '/wwwroot' }}
+        run: |
+          if ! command -v lftp &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y lftp
+          fi
+          lftp -c "set sftp:auto-confirm yes; \
+                   open -u $SFTP_USER,$SFTP_PASSWORD sftp://$SFTP_HOST:22; \
+                   rm -f $SFTP_DIR/app_offline.htm"

@@ -37,7 +37,7 @@
     <Watch Include="wwwroot/daisyui-theme.mjs" />
   </ItemGroup>
 
-  <Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="$(TailwindInput);wwwroot/daisyui.mjs;wwwroot/daisyui-theme.mjs;@(Content -> '%(FullPath)');@(_ContentIncludedByDefault -> '%(FullPath)')" Outputs="$(TailwindOutput)">
+  <Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwindBuild)' != 'true'" Inputs="$(TailwindInput);wwwroot/daisyui.mjs;wwwroot/daisyui-theme.mjs;@(Content -> '%(FullPath)');@(_ContentIncludedByDefault -> '%(FullPath)')" Outputs="$(TailwindOutput)">
     <Message Importance="high" Text="Compiling Tailwind CSS: $(TailwindInput) -> $(TailwindOutput)" />
     <Exec Command="tw -i &quot;$(TailwindInput)&quot; -o &quot;$(TailwindOutput)&quot; --minify" />
   </Target>
