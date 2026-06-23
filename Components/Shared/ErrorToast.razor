@@ -1,3 +1,79 @@
-﻿<div id="toast" data-permanent>
-    <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+@using BlazingBlog.Services
+@implements IDisposable
+@inject ToastService ToastService
+
+<div class="toast toast-top toast-end z-50 pointer-events-none">
+    @foreach (var t in _toasts)
+    {
+        <div class="alert @AlertClass(t.Type) shadow-lg max-w-sm pointer-events-auto" role="alert">
+            <Icon Name="@IconFor(t.Type)" Class="size-5 shrink-0" />
+            <div class="min-w-0">
+                <div class="font-semibold text-sm leading-tight">@t.Title</div>
+                @if (!string.IsNullOrWhiteSpace(t.Message))
+                {
+                    <div class="text-sm opacity-90 break-words">@t.Message</div>
+                }
+            </div>
+            <button type="button" class="btn btn-ghost btn-xs btn-circle" @onclick="() => Remove(t.Id)" aria-label="Dismiss">
+                <Icon Name="x" Class="size-4" />
+            </button>
+        </div>
+    }
 </div>
+
+@code {
+    private readonly List<ToastMessage> _toasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnNotify += Handle;
+    }
+
+    private async void Handle(ToastMessage msg)
+    {
+        await InvokeAsync(() =>
+        {
+            _toasts.Add(msg);
+            StateHasChanged();
+        });
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(4000);
+            await InvokeAsync(() =>
+            {
+                _toasts.RemoveAll(t => t.Id == msg.Id);
+                StateHasChanged();
+            });
+        });
+    }
+
+    private async Task Remove(Guid id)
+    {
+        await InvokeAsync(() =>
+        {
+            _toasts.RemoveAll(t => t.Id == id);
+            StateHasChanged();
+        });
+    }
+
+    private static string AlertClass(ToastType type) => type switch
+    {
+        ToastType.Success => "alert-success",
+        ToastType.Warning => "alert-warning",
+        ToastType.Danger => "alert-error",
+        _ => "alert-info"
+    };
+
+    private static string IconFor(ToastType type) => type switch
+    {
+        ToastType.Success => "check",
+        ToastType.Warning => "alert-triangle",
+        ToastType.Danger => "alert-triangle",
+        _ => "info"
+    };
+
+    public void Dispose()
+    {
+        ToastService.OnNotify -= Handle;
+    }
+}

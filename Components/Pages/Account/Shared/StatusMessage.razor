@@ -1,8 +1,11 @@
-﻿@if (!string.IsNullOrEmpty(DisplayMessage))
+@if (!string.IsNullOrEmpty(DisplayMessage))
 {
-    var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-@statusMessageClass" role="alert">
-        @DisplayMessage
+    var isError = DisplayMessage.StartsWith("Error");
+    var alertClass = isError ? "alert-error" : "alert-success";
+    var iconName = isError ? "alert-triangle" : "check";
+    <div class="alert @alertClass mb-4" role="alert">
+        <Icon Name="@iconName" Class="size-5" />
+        <span>@DisplayMessage</span>
     </div>
 }
 

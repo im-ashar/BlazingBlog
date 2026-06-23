@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-BlazingBlog-c3074607-031a-4072-8da6-59ba7adbeb1d</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <TailwindInput>wwwroot/app.tailwind.css</TailwindInput>
+    <TailwindOutput>wwwroot/app.css</TailwindOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,86 +19,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\assets\img\demo\1.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\10.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\2.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\3.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\5.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\9.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\avatar.png" />
-    <Content Remove="wwwroot\assets\img\demo\avatar2.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\blog4.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\blog5.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\blog6.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\blog8.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\blog9.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\coffee.png" />
-    <Content Remove="wwwroot\assets\img\demo\demo1.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\home.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\intro.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\sal.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\slide1.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\slide2.jpg" />
-    <Content Remove="wwwroot\assets\img\demo\slide3.jpg" />
-    <Content Remove="wwwroot\assets\img\favicon.ico" />
-    <Content Remove="wwwroot\assets\img\sample\undraw_having_fun_iais.png" />
-    <Content Remove="wwwroot\assets\img\sample\undraw_off_road_9oae.svg" />
-    <Content Remove="wwwroot\assets\img\sample\undraw_QA_engineers_dg5p.svg" />
-    <Content Remove="wwwroot\assets\img\sample\undraw_vehicle_sale_v7fm.svg" />
-    <Content Remove="wwwroot\assets\img\sample\undraw_working_late_pukg.svg" />
-    <Content Remove="wwwroot\assets\img\screenshot-mundana-article.png" />
-    <Content Remove="wwwroot\assets\img\screenshot-mundana-category.png" />
-    <Content Remove="wwwroot\assets\img\screenshot-mundana.png" />
-    <Content Remove="wwwroot\assets\js\functions.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Blazor.Bootstrap" Version="3.3.1" />
     <PackageReference Include="Blazored.TextEditor" Version="1.1.2" />
-    <PackageReference Include="BlazorPageScript" Version="1.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\assets\img\demo\1.jpg" />
-    <None Include="wwwroot\assets\img\demo\10.jpg" />
-    <None Include="wwwroot\assets\img\demo\2.jpg" />
-    <None Include="wwwroot\assets\img\demo\3.jpg" />
-    <None Include="wwwroot\assets\img\demo\5.jpg" />
-    <None Include="wwwroot\assets\img\demo\9.jpg" />
-    <None Include="wwwroot\assets\img\demo\avatar.png" />
-    <None Include="wwwroot\assets\img\demo\avatar2.jpg" />
-    <None Include="wwwroot\assets\img\demo\blog4.jpg" />
-    <None Include="wwwroot\assets\img\demo\blog5.jpg" />
-    <None Include="wwwroot\assets\img\demo\blog6.jpg" />
-    <None Include="wwwroot\assets\img\demo\blog8.jpg" />
-    <None Include="wwwroot\assets\img\demo\blog9.jpg" />
-    <None Include="wwwroot\assets\img\demo\coffee.png" />
-    <None Include="wwwroot\assets\img\demo\demo1.jpg" />
-    <None Include="wwwroot\assets\img\demo\home.jpg" />
-    <None Include="wwwroot\assets\img\demo\intro.jpg" />
-    <None Include="wwwroot\assets\img\demo\sal.jpg" />
-    <None Include="wwwroot\assets\img\demo\slide1.jpg" />
-    <None Include="wwwroot\assets\img\demo\slide2.jpg" />
-    <None Include="wwwroot\assets\img\demo\slide3.jpg" />
-    <None Include="wwwroot\assets\img\favicon.ico" />
-    <None Include="wwwroot\assets\img\sample\undraw_having_fun_iais.png" />
-    <None Include="wwwroot\assets\img\sample\undraw_off_road_9oae.svg" />
-    <None Include="wwwroot\assets\img\sample\undraw_QA_engineers_dg5p.svg" />
-    <None Include="wwwroot\assets\img\sample\undraw_vehicle_sale_v7fm.svg" />
-    <None Include="wwwroot\assets\img\sample\undraw_working_late_pukg.svg" />
-    <None Include="wwwroot\assets\img\screenshot-mundana-article.png" />
-    <None Include="wwwroot\assets\img\screenshot-mundana-category.png" />
-    <None Include="wwwroot\assets\img\screenshot-mundana.png" />
-    <None Include="wwwroot\assets\js\functions.js" />
+    <Watch Include="$(TailwindInput)" />
+    <Watch Include="wwwroot/daisyui.mjs" />
+    <Watch Include="wwwroot/daisyui-theme.mjs" />
   </ItemGroup>
+
+  <Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwindBuild)' != 'true'" Inputs="$(TailwindInput);wwwroot/daisyui.mjs;wwwroot/daisyui-theme.mjs;@(Content -> '%(FullPath)');@(_ContentIncludedByDefault -> '%(FullPath)')" Outputs="$(TailwindOutput)">
+    <Message Importance="high" Text="Compiling Tailwind CSS: $(TailwindInput) -> $(TailwindOutput)" />
+    <Exec Command="tw -i &quot;$(TailwindInput)&quot; -o &quot;$(TailwindOutput)&quot; --minify" />
+  </Target>
 
 </Project>

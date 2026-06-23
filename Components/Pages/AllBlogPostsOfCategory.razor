@@ -1,54 +1,124 @@
-﻿@page "/{categorySlug}-posts/all"
+@page "/{categorySlug}-posts/all"
 @page "/{categorySlug}-posts/all/page-{uriPageNumber:int}"
-<PageTitle>@(_category != null ? _category?.Name : "All Blog Posts") Posts</PageTitle>
+@using BlazingBlog.Data.Models
 @inject IBlogPostService BlogPostService
 @inject ICategoryService CategoryService
 @inject NavigationManager NavigationManager
 
-<div class="container mt-5 mb-5">
-    <div class="row">
-        <div class="col-md-8">
-            <h5 class="fw-bold spanborder"><span>@_category?.Name Posts @(_pageIndex > 1 ? $"Page - {_pageIndex}" : "")</span></h5>
-            <BlogPostsList Posts="_posts" />
-            <hr />
-            <div class="d-flex justify-content-between">
+<PageTitle>@(_category != null ? _category?.Name : "All Posts") · BlazingBlog</PageTitle>
+
+@* ============================================================
+   COMPACT HERO BAND
+   ============================================================ *@
+<section class="relative overflow-hidden border-b border-base-300">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-base-100 to-base-100"></div>
+    <div class="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] [background-size:24px_24px]"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8 sm:pt-14 sm:pb-10">
+        <nav class="flex items-center gap-1.5 text-xs text-base-content/60 mb-4">
+            <a href="/" class="hover:text-primary transition-colors">Home</a>
+            <Icon Name="chevron-right" Class="size-3" />
+            <a href="@(CategorySlug + "-posts")" class="hover:text-primary transition-colors">@_category?.Name</a>
+            <Icon Name="chevron-right" Class="size-3" />
+            <span class="text-base-content">All posts</span>
+        </nav>
+
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider mb-3">
+            <Icon Name="file-text" Class="size-3" /> Archive
+        </span>
+
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.05]">
+                    All @_category?.Name posts
+                </h1>
                 @if (_pageIndex > 1)
                 {
-                    var prevPageUrl = $"/{CategorySlug}-posts/all";
-                    if (_pageIndex > 2)
-                    {
-                        prevPageUrl += $"/page-{_pageIndex - 1}";
-                    }
-                    <a href="@prevPageUrl" class="btn btn-sm btn-outline-primary">Previous Page</a>
+                    <p class="mt-2 text-sm text-base-content/60">Page @_pageIndex</p>
                 }
-                else
+            </div>
+            <a href="@(CategorySlug + "-posts")" class="btn btn-ghost btn-sm gap-1">
+                <Icon Name="arrow-left" Class="size-4" /> Back to @_category?.Name
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+    <div class="grid gap-12 lg:grid-cols-[1fr_320px]">
+        <div class="min-w-0">
+            @if (_posts.Length == 0)
+            {
+                <div class="text-center py-16 border border-dashed border-base-300 rounded-box">
+                    <span class="inline-flex size-12 items-center justify-center rounded-full bg-base-200 text-base-content/60 mb-4">
+                        <Icon Name="file-text" Class="size-6" />
+                    </span>
+                    <h3 class="font-display text-lg font-semibold tracking-tight mb-1">No posts on this page</h3>
+                    <p class="text-sm text-base-content/60 max-w-sm mx-auto">Try a previous page or head back to the category overview.</p>
+                    <a href="@(CategorySlug + "-posts")" class="btn btn-ghost btn-sm mt-4 gap-1">
+                        <Icon Name="arrow-left" Class="size-4" /> Back to @_category?.Name
+                    </a>
+                </div>
+            }
+            else
+            {
+                <BlogPostsList Posts="_posts" />
+            }
+
+            <div class="join mt-10 flex">
+                @if (_pageIndex > 1)
                 {
-                    <span> &nbsp;</span>
+                    var prevPageUrl = $"/{CategorySlug}-posts/all" + (_pageIndex > 2 ? $"/page-{_pageIndex - 1}" : "");
+                    <a href="@prevPageUrl" class="join-item btn btn-outline btn-sm gap-1">
+                        <Icon Name="arrow-left" Class="size-4" /> Previous
+                    </a>
                 }
+                <span class="join-item btn btn-disabled btn-sm pointer-events-none">Page @_pageIndex</span>
                 @if (_posts.Length == _pageSize)
                 {
-                    <a href="@CategorySlug-posts/all/page-@(_pageIndex + 1)" class="btn btn-sm btn-outline-primary">Next Page</a>
+                    <a href="@CategorySlug-posts/all/page-@(_pageIndex + 1)" class="join-item btn btn-outline btn-sm gap-1">
+                        Next <Icon Name="arrow-right" Class="size-4" />
+                    </a>
                 }
-
             </div>
         </div>
-        <PopularBlogPostsList Posts="_popular" />
+
+        <aside class="space-y-8">
+            @if (_popular.Length > 0)
+            {
+                <PopularBlogPostsList Posts="_popular" />
+            }
+
+            <div class="relative overflow-hidden rounded-box bg-gradient-to-br from-primary/10 via-base-200 to-base-200 border border-base-300 p-6">
+                <div class="absolute -top-12 -right-12 size-32 bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="relative">
+                    <span class="inline-flex items-center justify-center size-9 rounded-full bg-primary text-primary-content mb-3">
+                        <Icon Name="mail" Class="size-4" />
+                    </span>
+                    <h3 class="font-display text-lg font-semibold tracking-tight mb-1">Never miss a post</h3>
+                    <p class="text-sm text-base-content/70 mb-4">Get weekly highlights straight to your inbox.</p>
+                    <a href="#subscribe" class="btn btn-primary btn-sm w-full gap-1">
+                        Subscribe <Icon Name="arrow-right" Class="size-4" />
+                    </a>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
-<SubscribeBox />
+
+<div id="subscribe">
+    <SubscribeBox />
+</div>
+
 @code {
-    [Parameter]
-    public string CategorySlug { get; set; } = default!;
-    [Parameter]
-    public int? UriPageNumber { get; set; } = 1;
+    [Parameter] public string CategorySlug { get; set; } = default!;
+    [Parameter] public int? UriPageNumber { get; set; } = 1;
 
     private BlogPost[] _popular = [];
     private BlogPost[] _posts = [];
-
     private Category? _category = default!;
-
     private int _pageIndex = 1;
-    private const int _pageSize = 2;
+    private const int _pageSize = 6;
 
     protected async override Task OnInitializedAsync()
     {
@@ -59,7 +129,6 @@
                 NavigationManager.NavigateTo("/", replace: true);
                 return;
             }
-
             _pageIndex = UriPageNumber.Value;
         }
 
@@ -70,10 +139,9 @@
             return;
         }
         _category = category;
-        var posts = await Task.WhenAll
-        (
-        BlogPostService.GetPopularBlogPostsAsync(4, category.Id),
-        BlogPostService.GetBlogPostsAsync(_pageIndex, _pageSize, category.Id)
+        var posts = await Task.WhenAll(
+            BlogPostService.GetPopularBlogPostsAsync(4, category.Id),
+            BlogPostService.GetBlogPostsAsync(_pageIndex, _pageSize, category.Id)
         );
         _popular = posts[0];
         _posts = posts[1];

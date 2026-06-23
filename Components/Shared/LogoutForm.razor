@@ -1,11 +1,14 @@
-﻿@inject NavigationManager NavigationManager
-<form action="Account/Logout" method="post" class="d-flex justify-content-center align-items-center w-100">
+@inject NavigationManager NavigationManager
+@using BlazingBlog.Components.Shared
+
+<form action="Account/Logout" method="post" class="w-full">
     <AntiforgeryToken />
     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-    <Button Type="ButtonType.Submit" Color="ButtonColor.Danger">
-        <Icon Name="IconName.ArrowLeft" />
+    <button type="submit"
+            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:bg-error/10 hover:text-error transition-colors w-full">
+        <Icon Name="log-out" Class="size-4" />
         Logout
-    </Button>
+    </button>
 </form>
 
 @code {
@@ -15,5 +18,4 @@
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.BaseUri);
     }
-
 }

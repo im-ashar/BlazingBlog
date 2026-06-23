@@ -1,32 +1,58 @@
-﻿@page "/admin/manage-subscribers"
-<title>Manage Subscribers</title>
+@page "/admin/manage-subscribers"
+@using BlazingBlog.Components.Shared
+@using BlazingBlog.Data.Models
 @inject ISubscriberService SubscriberService
+
+<PageTitle>Subscribers · Admin</PageTitle>
 
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
-<AdminHeader Title="Manage Subscribers" />
+<AdminHeader Title="Subscribers" Subtitle="People following your newsletter." />
 
-<QuickGrid ItemsProvider="_subscribersProvider" Pagination="paginationState" Class="table table-bordered table-striped">
-    <PropertyColumn Property="@(b=>b.Name)" />
-    <PropertyColumn Property="@(b=>b.Email)" />
-    <PropertyColumn Property="@(b=>b.SubscribedOn)" Format="MM-dd-yyy hh:mm:ss" Title="Subscribed On" />
-</QuickGrid>
-<Paginator State="paginationState" />
+<div class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
+    @if (_totalCount == 0)
+    {
+        <div class="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <span class="inline-flex size-12 items-center justify-center rounded-full bg-base-200 text-base-content/60 mb-4">
+                <Icon Name="mail" Class="size-6" />
+            </span>
+            <h3 class="font-display text-lg font-semibold tracking-tight mb-1">No subscribers yet</h3>
+            <p class="text-sm text-base-content/60 max-w-sm">When readers subscribe to your newsletter, they'll appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <QuickGrid ItemsProvider="_subscribersProvider" Pagination="paginationState" Class="table table-zebra w-full">
+                <PropertyColumn Property="@(b=>b.Name)" Title="Name" />
+                <PropertyColumn Property="@(b=>b.Email)" Title="Email" />
+                <PropertyColumn Property="@(b=>b.SubscribedOn)" Format="MMM dd, yyyy · HH:mm" Title="Subscribed on" />
+            </QuickGrid>
+        </div>
+        <div class="border-t border-base-300 p-3 flex items-center justify-end">
+            <Paginator State="paginationState" />
+        </div>
+    }
+</div>
 
 @code {
-    private const int pageSize = 5;
+    private const int pageSize = 10;
 
     private PaginationState paginationState = new PaginationState { ItemsPerPage = pageSize };
 
     private GridItemsProvider<Subscriber> _subscribersProvider = default!;
+    private int _totalCount;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        var initial = await SubscriberService.GetSubscribersAsync(0, 1);
+        _totalCount = initial.TotalCount;
+
         _subscribersProvider = async request =>
         {
-            var pagesBlogs = await SubscriberService.GetSubscribersAsync(request.StartIndex, request.Count ?? pageSize);
-            var gridItemsProvider = GridItemsProviderResult.From(pagesBlogs.Records, pagesBlogs.TotalCount);
-            return gridItemsProvider;
+            var pages = await SubscriberService.GetSubscribersAsync(request.StartIndex, request.Count ?? pageSize);
+            _totalCount = pages.TotalCount;
+            return GridItemsProviderResult.From(pages.Records, pages.TotalCount);
         };
     }
 }

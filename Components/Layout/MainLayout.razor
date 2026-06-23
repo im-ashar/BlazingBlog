@@ -1,17 +1,18 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
-<Navbar />
-<ErrorToast @rendermode="InteractiveServer"/>
-<div class="d-flex" style="margin-top:60px;">
-    <div class="flex-grow-1 min-vh-100">
+
+<div class="min-h-screen flex flex-col bg-base-100 text-base-content">
+    <Navbar />
+    <ErrorToast @rendermode="InteractiveServer" />
+    <main class="flex-1 w-full pt-20">
         @Body
-    </div>
+    </main>
+    <Footer />
 </div>
-<Footer />
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
-    <a href="/" class="reload">Reload</a>
+    <a href="/" class="reload underline">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
 
@@ -23,9 +24,6 @@
     {
         if (HttpContext is null)
         {
-            // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
-            // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
-            // must transition back from interactive mode to a server-rendered page.
             NavigationManager.Refresh(forceReload: true);
         }
     }

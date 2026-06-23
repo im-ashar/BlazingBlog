@@ -1,60 +1,83 @@
-﻿@using BlazingBlog.Data
+@using BlazingBlog.Data
 @using BlazingBlog.Data.Models
 @using BlazingBlog.Services
+@using BlazingBlog.Components.Shared
 @using Microsoft.AspNetCore.Identity
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ICategoryService CategoryService
 
-<nav class="navbar navbar-expand-lg fixed-top py-0">
-    <div class="container" style="min-height:55px;background-color: #e3f2fd;">
-        <a class="navbar-brand" href="/"><strong>Blazing Blog</strong></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                @foreach (var category in _categories)
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@(category.Slug+"-posts")">
-                            @category.Name
-                        </NavLink>
-                    </li>
-                }
-            </ul>
-            <div class="d-flex">
-                <AuthorizeView>
-                    <Authorized>
-                        <ul class="navbar-nav ms-auto d-flex align-items-center">
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="admin/dashboard">
-                                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true">@context.User.GetFullNameOfUser()</span>
-                                </NavLink>
-                            </li>
-                            <li class="nav-item">
-                                <LogoutForm />
-                            </li>
+<nav class="fixed top-0 inset-x-0 z-40 backdrop-blur-md bg-base-100/80 border-b border-base-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 group">
+            <span class="inline-flex items-center justify-center size-8 rounded-lg bg-primary text-primary-content font-bold text-sm">B</span>
+            <span class="font-display text-lg font-semibold tracking-tight">Blazing<span class="text-primary">Blog</span></span>
+        </a>
+
+        <ul class="hidden lg:flex items-center gap-1">
+            @foreach (var category in _categories)
+            {
+                <li>
+                    <NavLink class="px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:text-base-content hover:bg-base-200 transition-colors"
+                             ActiveClass="!text-base-content !bg-base-200"
+                             href="@(category.Slug + "-posts")">
+                        @category.Name
+                    </NavLink>
+                </li>
+            }
+        </ul>
+
+        <div class="flex items-center gap-2">
+            <button type="button"
+                    onclick="BlazingBlogTheme.toggle()"
+                    aria-label="Toggle theme"
+                    class="btn btn-ghost btn-sm btn-circle theme-toggle-btn">
+                <span class="theme-toggle-light"><Icon Name="moon" Class="size-5" /></span>
+                <span class="theme-toggle-dark"><Icon Name="sun" Class="size-5" /></span>
+            </button>
+
+            <AuthorizeView>
+                <Authorized>
+                    <div class="dropdown dropdown-end">
+                        <label tabindex="0" class="btn btn-ghost btn-sm gap-2 normal-case">
+                            <span class="inline-flex items-center justify-center size-7 rounded-full bg-base-200 text-base-content text-xs font-semibold">
+                                @GetInitials(context.User.GetFullNameOfUser())
+                            </span>
+                            <span class="hidden sm:inline text-sm">@context.User.GetFullNameOfUser()</span>
+                            <Icon Name="chevron-down" Class="size-4" />
+                        </label>
+                        <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-box shadow-lg mt-2 w-56 p-2 z-50">
+                            <li><NavLink href="admin/dashboard">Dashboard</NavLink></li>
+                            <li><NavLink href="admin/manage-posts">Manage Posts</NavLink></li>
+                            <li><NavLink href="admin/manage-categories">Manage Categories</NavLink></li>
+                            <li><NavLink href="admin/manage-subscribers">Subscribers</NavLink></li>
+                            <li class="border-t border-base-300 mt-1 pt-1"><LogoutForm /></li>
                         </ul>
-                    </Authorized>
-                    <NotAuthorized>
-                        <ul class="navbar-nav ms-auto d-flex align-items-center">
-                            <li class="nav-item me-1">
-                                <NavLink class="nav-link btn btn-info" href="account/login">Login</NavLink>
-                            </li>
-                            <li class="nav-item">
-                                <NavLink class="nav-link btn btn-info" href="account/register">Register</NavLink>
-                            </li>
-                        </ul>
-                    </NotAuthorized>
-                </AuthorizeView>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink href="account/login" class="btn btn-ghost btn-sm">Login</NavLink>
+                    <NavLink href="account/register" class="btn btn-primary btn-sm">Get started</NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <div class="dropdown dropdown-end lg:hidden">
+                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
+                    <Icon Name="menu" Class="size-5" />
+                </label>
+                <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-box shadow-lg mt-2 w-56 p-2 z-50">
+                    @foreach (var category in _categories)
+                    {
+                        <li><NavLink href="@(category.Slug + "-posts")">@category.Name</NavLink></li>
+                    }
+                </ul>
             </div>
         </div>
     </div>
 </nav>
-@code {
 
+@code {
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
@@ -86,5 +109,13 @@
         {
             _categories = [.. _categories, .. categories.Where(c => !c.ShowOnNavbar).Take(maxCategoriesToShowOnNavbar - _categories.Length).ToArray()];
         }
+    }
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "U";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0][..1].ToUpperInvariant();
+        return (parts[0][..1] + parts[^1][..1]).ToUpperInvariant();
     }
 }

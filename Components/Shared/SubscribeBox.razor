@@ -1,36 +1,46 @@
-﻿@inject ISubscriberService SubscriberService
+@using BlazingBlog.Data.Models
+@using BlazingBlog.Services
+@using BlazingBlog.Utilities
+@inject ISubscriberService SubscriberService
 @inject ToastService ToastService
 @rendermode InteractiveServer
-<div class="container pt-4 pb-4">
-    <div class="border p-5 bg-lightblue">
-        <div class="row justify-content-between">
-            <div class="col-md-6">
-                <h5 class="fw-bold secondfont">Become a member</h5>
-                Get the latest news right in your inbox. It's free and you can unsubscribe at any time. We hate spam as much as we do, so we never spam!
-            </div>
-            <div class="col-md-6">
-                <EditForm Model="model" method="post" FormName="subscribe-form" Enhance OnValidSubmit="SaveSubscriber">
-                     <DataAnnotationsValidator />
-                     <div class="row">
-                         <div class="col-md-6">
-                             <InputText @bind-Value="model.Name" class="form-control" placeholder="Name" />
-                             <ValidationMessage For="()=>model.Name" />
-                         </div>
-                         <div class="col-md-6">
-                             <InputText @bind-Value="model.Email" class="form-control" placeholder="Email" />
-                             <ValidationMessage For="()=>model.Email" />
-                         </div>
-                         <div class="col-md-12 mt-3">
-                             <button type="submit" class="btn btn-success btn-block">Subscribe</button>
-                         </div>
-                     </div>
-                 </EditForm>
-             </div>
-         </div>
-     </div>
- </div>
 
- @code {
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-16">
+    <div class="relative overflow-hidden rounded-box bg-base-200 border border-base-300 p-8 sm:p-12 grid gap-8 md:grid-cols-2 items-center">
+        <div class="absolute -top-20 -right-20 size-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative">
+            <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary mb-3">
+                <Icon Name="send" Class="size-4" /> Newsletter
+            </span>
+            <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight mb-3">Become a member</h2>
+            <p class="text-base-content/70 max-w-md">
+                Get the latest stories straight to your inbox — for free. Unsubscribe anytime. No spam, ever.
+            </p>
+        </div>
+        <EditForm Model="model" method="post" FormName="subscribe-form" Enhance OnValidSubmit="SaveSubscriber" class="relative">
+            <DataAnnotationsValidator />
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div>
+                    <InputText @bind-Value="model.Name"
+                               class="input input-bordered w-full bg-base-100"
+                               placeholder="Your name" />
+                    <ValidationMessage For="()=>model.Name" />
+                </div>
+                <div>
+                    <InputText @bind-Value="model.Email"
+                               class="input input-bordered w-full bg-base-100"
+                               placeholder="you@example.com" />
+                    <ValidationMessage For="()=>model.Email" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-full mt-3 gap-2">
+                <Icon Name="send" Class="size-4" /> Subscribe
+            </button>
+        </EditForm>
+    </div>
+</section>
+
+@code {
     [SupplyParameterFromForm]
     public Subscriber model { get; set; } = new();
 

@@ -1,25 +1,49 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @layout MainLayout
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 bg-light py-3 card shadow" style="min-height:calc(100vh - 200px)">
-            <AuthorizeView>
-                <Authorized>
-                    <h6 class="text-center fw-bold">Welcome @context.User.GetFullNameOfUser()</h6>
-                </Authorized>
-            </AuthorizeView>
-            <hr />
-            <div class="list-group">
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-categories">Manage Categories</NavLink>
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-posts">Manage Posts</NavLink>
-                <NavLink class="list-group-item list-group-item-action" href="admin/manage-subscribers">Manage Subscribers</NavLink>
-                <div class="list-group-item list-group-item-action">
-                    <LogoutForm />
+@using BlazingBlog.Components.Shared
+
+<div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 grid gap-6 lg:grid-cols-[260px_1fr]">
+    <aside class="bg-base-200 border border-base-300 rounded-box p-4 h-fit lg:sticky lg:top-24">
+        <AuthorizeView>
+            <Authorized>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="inline-flex items-center justify-center size-10 rounded-full bg-primary text-primary-content font-semibold">
+                        @(context.User.GetFullNameOfUser()?.Substring(0,1).ToUpperInvariant())
+                    </span>
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-base-content/60">Signed in</div>
+                        <div class="text-sm font-medium truncate">@context.User.GetFullNameOfUser()</div>
+                    </div>
                 </div>
+            </Authorized>
+        </AuthorizeView>
+        <nav class="flex flex-col gap-1">
+            <NavLink class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:bg-base-300 hover:text-base-content transition-colors"
+                     ActiveClass="!bg-base-300 !text-base-content"
+                     href="admin/dashboard">
+                <Icon Name="dashboard" Class="size-4" /> Dashboard
+            </NavLink>
+            <NavLink class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:bg-base-300 hover:text-base-content transition-colors"
+                     ActiveClass="!bg-base-300 !text-base-content"
+                     href="admin/manage-categories">
+                <Icon Name="tag" Class="size-4" /> Categories
+            </NavLink>
+            <NavLink class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:bg-base-300 hover:text-base-content transition-colors"
+                     ActiveClass="!bg-base-300 !text-base-content"
+                     href="admin/manage-posts">
+                <Icon Name="file-text" Class="size-4" /> Posts
+            </NavLink>
+            <NavLink class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-base-content/70 hover:bg-base-300 hover:text-base-content transition-colors"
+                     ActiveClass="!bg-base-300 !text-base-content"
+                     href="admin/manage-subscribers">
+                <Icon Name="mail" Class="size-4" /> Subscribers
+            </NavLink>
+            <div class="mt-2 pt-2 border-t border-base-300">
+                <LogoutForm />
             </div>
-        </div>
-        <div class="col-md-10">
-            @Body
-        </div>
-    </div>
+        </nav>
+    </aside>
+    <section class="min-w-0">
+        @Body
+    </section>
 </div>

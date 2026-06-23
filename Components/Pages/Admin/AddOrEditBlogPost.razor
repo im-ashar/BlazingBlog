@@ -1,6 +1,7 @@
-﻿@page "/admin/manage-posts/new"
+@page "/admin/manage-posts/new"
 @page "/admin/manage-posts/edit/{id:int?}"
-<PageTitle>@dashboardHeaderTitle</PageTitle>
+@using BlazingBlog.Components.Shared
+@using BlazingBlog.Data.Models
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @inject IBlogPostAdminService BlogPostAdminService
@@ -9,143 +10,151 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<AdminHeader Title="@dashboardHeaderTitle">
+<PageTitle>@dashboardHeaderTitle</PageTitle>
+
+<AdminHeader Title="@dashboardHeaderTitle" Subtitle="Compose, preview and publish.">
     <ActionButtons>
-        <a href="/admin/manage-posts" class="btn btn-primary text-decoration-none d-flex justify-content-center align-items-center">
-            <Icon Name="IconName.ArrowLeft" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-            Back To Manage Blog Posts
+        <a href="/admin/manage-posts" class="btn btn-ghost btn-sm gap-1">
+            <Icon Name="arrow-left" Class="size-4" /> Back to posts
         </a>
     </ActionButtons>
 </AdminHeader>
-<EditForm Model="model" FormName="blogPostForm" class="card shadow" OnValidSubmit="SaveBlogPostAsync">
+
+<EditForm Model="model" FormName="blogPostForm" OnValidSubmit="SaveBlogPostAsync">
     <DataAnnotationsValidator />
-    <div class="row card-body m-1">
-        <div class="col-12">
-            <div class="row">
-                <div class="col-sm-6 d-flex flex-column justify-content-around">
-                    <div class="mb-3">
-                        <label for="@model.Title" class="form-label fw-bold">Title</label>
-                        <InputText @bind-Value="model.Title" class="form-control" placeholder="Blog Post Title" />
-                        <ValidationMessage For="()=>model.Title" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="@model.Title" class="form-label fw-bold">Category</label>
-                        <InputSelect @bind-Value="model.CategoryId" class="form-control" placeholder="Select A Category">
-                            <option value="0">Select A Category</option>
-                            @foreach (var category in categories)
-                            {
-                                <option value="@category.Id">@category.Name</option>
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="()=>model.CategoryId" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="@model.Introduction" class="form-label fw-bold">Introduction</label>
-                        <InputText @bind-Value="model.Introduction" class="form-control" placeholder="Blog Post Introduction" />
-                        <ValidationMessage For="()=>model.Introduction" />
-                    </div>
-                    @if (!string.IsNullOrWhiteSpace(imageUrl))
-                    {
-                        <div class="mb-3">
-                            <img src="@imageUrl" class="img-fluid" style="height:200px" />
-                        </div>
-                    }
-                    <div class="mb-3">
-                        <label for="@model.ImageFile" class="form-label fw-bold">Upload An Image</label>
-                        <InputFile class="form-control mb-3" @bind-Value="model.ImageFile" OnChange="HandleUploadFileAsync" />
-                        <ValidationMessage For="()=>model.Image" />
-                    </div>
-                    <div class="d-flex mb-3">
-                        <div class="d-flex">
-                            <label for="@model.IsFeatured" class="form-label me-3 fw-bold">Featured?</label>
-                            <span>
-                                <Switch @bind-Value="model.IsFeatured" />
-                            </span>
-                        </div>
-                        <div class="d-flex">
-                            <label for="@model.IsPublished" class="form-label me-3 fw-bold">Published?</label>
-                            <span>
-                                <Switch @bind-Value="model.IsPublished" />
-                            </span>
-                        </div>
-                    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+
+        <div class="lg:col-span-2 space-y-6">
+
+            <div class="bg-base-100 border border-base-300 rounded-box p-6 space-y-5">
+                <div>
+                    <label class="label pb-1"><span class="label-text text-sm font-medium">Title</span></label>
+                    <InputText @bind-Value="model.Title" class="input input-bordered w-full bg-base-100" placeholder="Blog post title" />
+                    <ValidationMessage For="() => model.Title" class="text-error text-xs mt-1" />
                 </div>
-                <div class="col-sm-6">
-                    <div class="mb-3 editor-wrapper">
-                        <label class="form-label fw-bold">Content: </label>
-                        <BlazoredTextEditor ToolbarCSSClass="form-control" EditorCssClass="form-control" @ref="@quillHtml" Placeholder="Enter Content...">
-                            <ToolbarContent>
-                                <select class="ql-header">
-                                    <option selected=""></option>
-                                    <option value="1"></option>
-                                    <option value="2"></option>
-                                    <option value="3"></option>
-                                    <option value="4"></option>
-                                    <option value="5"></option>
-                                </select>
-                                <span class="ql-formats">
-                                    <button class="ql-bold"></button>
-                                    <button class="ql-italic"></button>
-                                    <button class="ql-underline"></button>
-                                    <button class="ql-strike"></button>
-                                </span>
-                                <span class="ql-formats">
-                                    <select class="ql-color"></select>
-                                    <select class="ql-background"></select>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-list" value="ordered"></button>
-                                    <button class="ql-list" value="bullet"></button>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-link"></button>
-                                </span>
-                            </ToolbarContent>
-                            <EditorContent>
-                                @((MarkupString)editorContent)
-                            </EditorContent>
-                        </BlazoredTextEditor>
-                        @if (!string.IsNullOrWhiteSpace(emptyContentError))
+
+                <div>
+                    <label class="label pb-1"><span class="label-text text-sm font-medium">Category</span></label>
+                    <InputSelect @bind-Value="model.CategoryId" class="select select-bordered w-full bg-base-100">
+                        <option value="0">Select a category</option>
+                        @foreach (var category in categories)
                         {
-                            <div class="validation-message">@emptyContentError</div>
+                            <option value="@category.Id">@category.Name</option>
                         }
-                    </div>
+                    </InputSelect>
+                    <ValidationMessage For="() => model.CategoryId" class="text-error text-xs mt-1" />
+                </div>
+
+                <div>
+                    <label class="label pb-1"><span class="label-text text-sm font-medium">Introduction</span></label>
+                    <InputText @bind-Value="model.Introduction" class="input input-bordered w-full bg-base-100" placeholder="A short summary for previews" />
+                    <ValidationMessage For="() => model.Introduction" class="text-error text-xs mt-1" />
                 </div>
             </div>
-            <div class="row">
-                <div class="d-flex mb-3">
-                    <Button Class="m-1 d-flex align-items-center" Type="ButtonType.Submit" Color="ButtonColor.Success">
-                        <Icon Name="IconName.Save" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-                        Save Changes
-                    </Button>
-                    <a href="/admin/manage-posts" class="btn btn-danger text-decoration-none m-1 d-flex align-items-center">
-                        <Icon Name="IconName.XCircle" Size="IconSize.x5" Color="IconColor.Light" Class="pe-1" />
-                        Close
-                    </a>
-                </div>
+
+            <div class="bg-base-100 border border-base-300 rounded-box p-6">
+                <label class="label pb-2"><span class="label-text text-sm font-medium">Content</span></label>
+                <BlazoredTextEditor @ref="quillHtml"
+                                    Placeholder="Start writing your post..."
+                                    ToolbarCSSClass="border border-base-300 border-b-0 rounded-t-box bg-base-200"
+                                    EditorCssClass="border border-base-300 rounded-b-box bg-base-100">
+                    <ToolbarContent>
+                        <select class="ql-header">
+                            <option selected=""></option>
+                            <option value="1"></option>
+                            <option value="2"></option>
+                            <option value="3"></option>
+                            <option value="4"></option>
+                            <option value="5"></option>
+                        </select>
+                        <span class="ql-formats">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-strike"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color"></select>
+                            <select class="ql-background"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-link"></button>
+                        </span>
+                    </ToolbarContent>
+                    <EditorContent>
+                        @((MarkupString)(editorContent ?? string.Empty))
+                    </EditorContent>
+                </BlazoredTextEditor>
+                @if (!string.IsNullOrWhiteSpace(emptyContentError))
+                {
+                    <div class="text-error text-sm mt-2">@emptyContentError</div>
+                }
             </div>
         </div>
 
-    </div>
+        <div class="space-y-6">
 
+            <div class="bg-base-100 border border-base-300 rounded-box p-6">
+                <h3 class="font-display text-sm font-semibold uppercase tracking-wider mb-4 text-base-content/70">Visibility</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm font-medium">Featured</span>
+                        <InputCheckbox @bind-Value="model.IsFeatured" class="toggle toggle-primary toggle-sm" />
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm font-medium">Published</span>
+                        <InputCheckbox @bind-Value="model.IsPublished" class="toggle toggle-success toggle-sm" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-base-100 border border-base-300 rounded-box p-6">
+                <h3 class="font-display text-sm font-semibold uppercase tracking-wider mb-4 text-base-content/70">Cover image</h3>
+                @if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    <div class="aspect-video rounded-md overflow-hidden border border-base-300 bg-base-200 mb-3">
+                        <img src="@imageUrl" alt="Cover preview" class="w-full h-full object-cover" />
+                    </div>
+                }
+                else
+                {
+                    <div class="aspect-video rounded-md border-2 border-dashed border-base-300 bg-base-200/50 flex items-center justify-center text-base-content/40 mb-3">
+                        <Icon Name="image" Class="size-10" />
+                    </div>
+                }
+                <label class="btn btn-outline btn-sm w-full gap-1 cursor-pointer">
+                    <Icon Name="upload" Class="size-4" />
+                    Upload image
+                    <InputFile class="hidden" @bind-Value="model.ImageFile" OnChange="HandleUploadFileAsync" />
+                </label>
+                <ValidationMessage For="() => model.Image" class="text-error text-xs mt-2 block" />
+            </div>
+
+            <div class="bg-base-100 border border-base-300 rounded-box p-6 space-y-2">
+                <button type="submit" class="btn btn-primary w-full gap-1">
+                    <Icon Name="save" Class="size-4" /> Save changes
+                </button>
+                <a href="/admin/manage-posts" class="btn btn-ghost w-full">Cancel</a>
+            </div>
+        </div>
+    </div>
 </EditForm>
 
 @code {
-
-    [Parameter]
-    public int? Id { get; set; }
+    [Parameter] public int? Id { get; set; }
 
     private BlogPost model = new BlogPost();
-    private List<Category> categories = [];
+    private List<Category> categories = new();
 
     private BlazoredTextEditor quillHtml = default!;
-
-    private string editorContent = default!;
-
+    private string? editorContent;
     private string emptyContentError = default!;
-
-    private string dashboardHeaderTitle => Id.HasValue && Id > 0 ? "Edit Blog Post" : "Add A New Blog Post";
-
+    private string dashboardHeaderTitle => Id.HasValue && Id > 0 ? "Edit blog post" : "New blog post";
     private string? imageUrl;
 
     protected async override Task OnInitializedAsync()
@@ -176,19 +185,18 @@
             {
                 model.ImageFile = null;
                 model.Image = null!;
-                throw new Exception("Please Upload An Image File");
+                throw new Exception("Please upload an image file.");
             }
             if (e.File.Size >= maxAllowedSize)
             {
                 model.ImageFile = null;
                 model.Image = null!;
-                throw new Exception("Please Upload An Image File Less Than 1MB");
+                throw new Exception("Please upload an image smaller than 1MB.");
             }
             var extension = Path.GetExtension(e.File.Name);
             using var imageStream = e.File.OpenReadStream(maxAllowedSize);
             using var ms = new MemoryStream();
             await imageStream.CopyToAsync(ms);
-
             imageUrl = $"data:image/{extension};base64,{Convert.ToBase64String(ms.ToArray())}";
         }
         catch (Exception ex)
@@ -196,26 +204,25 @@
             ex.ShowErrorToast(ToastService);
         }
     }
-    public bool IsImageFile(string fileName)
-    {
-        string[] imageExtensions = AppConstants.ImageSettings.AllowedImageExtensions; // Add more extensions if needed
 
-        string extension = Path.GetExtension(fileName);
+    private static bool IsImageFile(string fileName)
+    {
+        var imageExtensions = AppConstants.ImageSettings.AllowedImageExtensions;
+        var extension = Path.GetExtension(fileName);
         if (!string.IsNullOrEmpty(extension))
         {
-            string comparisonExtension = extension.ToLower();
-            return imageExtensions.Contains(comparisonExtension);
+            return imageExtensions.Contains(extension.ToLowerInvariant());
         }
         return false;
     }
-    //Save Blog Post
+
     private async Task SaveBlogPostAsync()
     {
         try
         {
             if (string.IsNullOrWhiteSpace(await quillHtml.GetText()))
             {
-                emptyContentError = "Please Enter Some Content";
+                emptyContentError = "Please enter some content.";
                 return;
             }
             model.Content = await quillHtml.GetHTML();
@@ -224,9 +231,9 @@
             var result = await BlogPostAdminService.SaveBlogPostAsync(model, userId);
             if (result == null)
             {
-                throw new Exception("Failed To Save Blog Post");
+                throw new Exception("Failed to save blog post.");
             }
-            ToastService.ShowSuccessToast("Blog Post Saved Successfully");
+            ToastService.ShowSuccessToast("Blog post saved successfully.");
             NavigationManager.NavigateTo("/admin/manage-posts");
         }
         catch (Exception ex)

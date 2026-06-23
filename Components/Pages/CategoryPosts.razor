@@ -1,73 +1,198 @@
-﻿@page "/{categorySlug}-posts"
-
+@page "/{categorySlug}-posts"
+@using BlazingBlog.Data.Models
 @inject IBlogPostService BlogPostService
 @inject ICategoryService CategoryService
 @inject NavigationManager NavigationManager
 
-<PageTitle>@_category?.Name Posts</PageTitle>
-@if (_featured is not null)
+<PageTitle>@_category?.Name · BlazingBlog</PageTitle>
+
+@* ============================================================
+   HERO BAND
+   ============================================================ *@
+<section class="relative overflow-hidden border-b border-base-300">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-base-100 to-base-100"></div>
+    <div class="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] [background-size:24px_24px]"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12 sm:pt-20 sm:pb-16">
+        <nav class="flex items-center gap-1.5 text-xs text-base-content/60 mb-5">
+            <a href="/" class="hover:text-primary transition-colors">Home</a>
+            <Icon Name="chevron-right" Class="size-3" />
+            <span class="text-base-content">@_category?.Name</span>
+        </nav>
+
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-content text-[11px] font-semibold uppercase tracking-wider mb-5">
+            <Icon Name="tag" Class="size-3" /> Category
+        </span>
+
+        <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.02] mb-4">
+            @_category?.Name
+        </h1>
+        <p class="text-base sm:text-lg text-base-content/70 max-w-2xl">
+            The latest stories, tutorials and deep-dives in @_category?.Name.
+        </p>
+
+        <div class="mt-7 flex flex-wrap items-center gap-2">
+            <NavLink href="@(CategorySlug + "-posts/all")" class="btn btn-primary btn-sm gap-2">
+                Browse all posts <Icon Name="arrow-right" Class="size-4" />
+            </NavLink>
+            <a href="#subscribe" class="btn btn-ghost btn-sm gap-2">
+                <Icon Name="mail" Class="size-4" /> Subscribe
+            </a>
+        </div>
+    </div>
+</section>
+
+@* ============================================================
+   TOPIC CHIPS
+   ============================================================ *@
+@if (_categories.Length > 0)
 {
-    <div class="container mt-5 mb-5">
-        <div class="row">
-            <div class="col-md-8">
-                <h5 class="fw-bold spanborder"><span>Featured in @_category?.Name</span></h5>
-                <div class="card border mb-2 shadow">
-                    <div class="m-2 border border-dark rounded rounded-2" style="background-image: url(@_featured.Image); height: 350px; background-size: cover; background-repeat: no-repeat;">
+    <section class="border-b border-base-300 bg-base-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-base-content/50 shrink-0">
+                    <Icon Name="tag" Class="size-3.5" /> Topics
+                </span>
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden">
+                    @foreach (var cat in _categories)
+                    {
+                        var isActive = cat.Id == _category?.Id;
+                        <a href="@(cat.Slug + "-posts")"
+                           class="shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors @(isActive
+                               ? "bg-primary text-primary-content border-primary"
+                               : "bg-base-100 border-base-300 text-base-content/80 hover:border-primary hover:text-primary hover:bg-primary/5")">
+                            @cat.Name
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+
+    @if (_featured is null && _recent.Length == 0)
+    {
+        <div class="text-center max-w-2xl mx-auto py-16">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200 text-xs font-semibold uppercase tracking-wider text-base-content/70 mb-4">
+                <Icon Name="alert-triangle" Class="size-3.5" /> Empty
+            </span>
+            <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight mb-3">No posts in @_category?.Name yet</h2>
+            <p class="text-base-content/70 mb-6">Be the first to know — subscribe and we'll let you know the moment a new article goes live.</p>
+            <a href="#subscribe" class="btn btn-primary gap-2">Subscribe <Icon Name="arrow-right" Class="size-4" /></a>
+        </div>
+    }
+    else
+    {
+        <div class="grid gap-12 lg:grid-cols-[1fr_320px]">
+            <div class="min-w-0 space-y-14">
+
+                @if (_featured is not null)
+                {
+                    <section>
+                        <header class="flex items-end justify-between mb-6">
+                            <div>
+                                <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">Editor's pick</span>
+                                <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Featured in @_category?.Name</h2>
+                            </div>
+                        </header>
+                        <a href="/posts/@_featured.Slug"
+                           class="group block bg-base-100 border border-base-300 rounded-box overflow-hidden hover:border-primary/60 transition-all">
+                            <div class="grid md:grid-cols-2 gap-0">
+                                <div class="aspect-[16/10] md:aspect-auto bg-base-200 overflow-hidden">
+                                    <img src="@_featured.Image" alt="@_featured.Title"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                </div>
+                                <div class="p-6 sm:p-8 flex flex-col">
+                                    @if (_featured.Category is not null)
+                                    {
+                                        <span class="self-start text-[11px] font-semibold uppercase tracking-wider text-primary mb-2">@_featured.Category.Name</span>
+                                    }
+                                    <h3 class="font-display text-2xl sm:text-3xl font-semibold leading-snug tracking-tight mb-3 group-hover:text-primary transition-colors">@_featured.Title</h3>
+                                    <p class="text-sm sm:text-base text-base-content/70 mb-4 line-clamp-3">@_featured.Introduction</p>
+                                    <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
+                                        <span>@_featured.User?.FullName</span>
+                                        <span>@_featured.PublishedAt.ToDisplay()</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </section>
+                }
+
+                @if (_recent.Length > 0)
+                {
+                    <section>
+                        <header class="flex items-end justify-between mb-6">
+                            <div>
+                                <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">Fresh off the press</span>
+                                <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Latest in @_category?.Name</h2>
+                            </div>
+                            <NavLink href="@(CategorySlug + "-posts/all")" class="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors">
+                                View all <Icon Name="arrow-right" Class="size-4" />
+                            </NavLink>
+                        </header>
+                        <BlogPostsList Posts="_recent" />
+                    </section>
+                }
+            </div>
+
+            <aside class="space-y-8">
+                @if (_popular.Length > 0)
+                {
+                    <PopularBlogPostsList Posts="_popular" />
+                }
+
+                <div class="relative overflow-hidden rounded-box bg-gradient-to-br from-primary/10 via-base-200 to-base-200 border border-base-300 p-6">
+                    <div class="absolute -top-12 -right-12 size-32 bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="relative">
+                        <span class="inline-flex items-center justify-center size-9 rounded-full bg-primary text-primary-content mb-3">
+                            <Icon Name="mail" Class="size-4" />
+                        </span>
+                        <h3 class="font-display text-lg font-semibold tracking-tight mb-1">Never miss a post</h3>
+                        <p class="text-sm text-base-content/70 mb-4">Get weekly highlights straight to your inbox.</p>
+                        <a href="#subscribe" class="btn btn-primary btn-sm w-full gap-1">
+                            Subscribe <Icon Name="arrow-right" Class="size-4" />
+                        </a>
                     </div>
-                    <div class="card-body p-3 d-flex flex-column align-items-start">
-                        <h2 class="h2 fw-bold">
-                            <a class="text-dark" href="/posts/@_featured.Slug">@_featured.Title</a>
-                        </h2>
-                        <p class="card-text">
-                            @_featured.Introduction
-                        </p>
-                        <div>
-                            <small class="d-block">@_featured.User.FullName</small>
-                            <small class="text-muted">@_featured.PublishedAt.ToDisplay()</small>
+                </div>
+
+                @if (_categories.Length > 1)
+                {
+                    <div class="rounded-box border border-base-300 bg-base-100 p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="inline-block w-1 h-5 bg-primary rounded-full"></span>
+                            <h3 class="font-display text-sm font-semibold uppercase tracking-wider">More topics</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var cat in _categories.Where(c => c.Id != _category?.Id).Take(8))
+                            {
+                                <a href="@(cat.Slug + "-posts")"
+                                   class="inline-flex items-center px-2.5 py-1 rounded-md bg-base-200 text-xs font-medium text-base-content/80 hover:bg-primary/10 hover:text-primary transition-colors">
+                                    @cat.Name
+                                </a>
+                            }
                         </div>
                     </div>
-                </div>
-                <h5 class="fw-bold spanborder"><span>Latest</span></h5>
-                <BlogPostsList Posts="_recent" />
-                <hr />
-                <div>
-                    <NavLink href="@(CategorySlug+"-posts"+"/all")" class="btn btn-outline-primary btn-sm float-end mb-3">All @_category?.Name Posts</NavLink>
-                </div>
-                <hr style="clear:both" />
-            </div>
-            <PopularBlogPostsList Posts="_popular" />
+                }
+            </aside>
         </div>
-    </div>
-}
-else
-{
-    <div class="container pt-4">
-        <div class="alert alert-warning text-center fw-bolder" role="alert">
-            There are no posts in @_category?.Name
-        </div>
-    </div>
+    }
+</div>
 
-    @* <div class="container mt-5 mb-5">
-        <div class="row">
-            <div class="col-md-12">
-                <p class="text-center">There are no posts in @_category?.Name</p>
-            </div>
-        </div>
-    </div> *@
-}
+<div id="subscribe">
+    <SubscribeBox />
+</div>
 
-<SubscribeBox />
 @code {
-    [Parameter]
-    public string CategorySlug { get; set; } = default!;
+    [Parameter] public string CategorySlug { get; set; } = default!;
 
     private BlogPost? _featured = default!;
     private BlogPost[] _popular = [];
     private BlogPost[] _recent = [];
     private Category _category = default!;
-    private BlogPost[] _posts = Array.Empty<BlogPost>();
-
-
+    private Category[] _categories = [];
 
     protected override async Task OnParametersSetAsync()
     {
@@ -78,15 +203,20 @@ else
             return;
         }
         _category = category;
-        var posts = await Task.WhenAll
-        (
+
+        var postsTask = Task.WhenAll(
            BlogPostService.GetFeaturedBlogPostsAsync(1, category.Id),
            BlogPostService.GetPopularBlogPostsAsync(4, category.Id),
-           BlogPostService.GetRecentBlogPostsAsync(5, category.Id)
+           BlogPostService.GetRecentBlogPostsAsync(6, category.Id)
         );
+        var categoriesTask = CategoryService.GetCategoriesAsync();
+
+        await Task.WhenAll(postsTask, categoriesTask);
+
+        var posts = postsTask.Result;
         _featured = posts[0].FirstOrDefault();
         _popular = posts[1];
         _recent = posts[2];
+        _categories = categoriesTask.Result.ToArray();
     }
-
 }
