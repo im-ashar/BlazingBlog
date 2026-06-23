@@ -1,13 +1,36 @@
-﻿<div class="container mt-5">
-    <footer class="bg-white border-top p-3 text-muted small">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <span class="navbar-brand me-2"><strong>BlazingBlog</strong></span> Copyright &copy;
-                @DateTime.Today.Year. All rights reserved.
+@using BlazingBlog.Components.Shared
+
+<footer class="border-t border-base-300 bg-base-100 mt-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid gap-8 md:grid-cols-3">
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="inline-flex items-center justify-center size-8 rounded-lg bg-primary text-primary-content font-bold text-sm">B</span>
+                <span class="font-display text-lg font-semibold tracking-tight">Blazing<span class="text-primary">Blog</span></span>
             </div>
-            <div>
-                Made with <strong>Blazor + .NET 9</strong> by <a target="_blank" class="text-secondary fw-bold" href="https://github.com/im-ashar">Muhammad Ashar</a>
-            </div>
+            <p class="text-sm text-base-content/70 max-w-xs">
+                Modern stories, tutorials and insights — built with Blazor &amp; .NET 10.
+            </p>
         </div>
-    </footer>
-</div>
+        <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-base-content/60 mb-3">Explore</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="/" class="hover:text-primary transition-colors">Home</a></li>
+                <li><a href="/account/login" class="hover:text-primary transition-colors">Sign in</a></li>
+                <li><a href="/account/register" class="hover:text-primary transition-colors">Create account</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="text-xs uppercase tracking-wider font-semibold text-base-content/60 mb-3">About</h4>
+            <p class="text-sm text-base-content/70">
+                Made with <strong class="text-base-content">Blazor + .NET 10</strong> by
+                <a target="_blank" rel="noopener" class="text-primary font-medium hover:underline" href="https://github.com/im-ashar">Muhammad Ashar</a>.
+            </p>
+        </div>
+    </div>
+    <div class="border-t border-base-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-base-content/60 flex flex-wrap items-center justify-between gap-2">
+            <span>© @DateTime.Today.Year BlazingBlog. All rights reserved.</span>
+            <span class="font-mono">v2.0</span>
+        </div>
+    </div>
+</footer>

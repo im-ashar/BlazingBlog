@@ -1,57 +1,149 @@
-﻿@page "/posts/{blogPostSlug}"
+@page "/posts/{blogPostSlug}"
 @using System.Web
+@using BlazingBlog.Data.Models
 @inject IBlogPostService BlogPostService
 @inject NavigationManager NavigationManager
+
 <PageTitle>@(_blogPost != null ? _blogPost.Title : "Details")</PageTitle>
+
 @if (_blogPost?.Id > 0)
 {
-    <div class="container">
-        <div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
-            <div class="h-100 tofront">
-                <div class="row justify-content-between">
-                    <div class="col-md-6 pt-3 pb-2 pr-6 align-self-center">
-                        <p class="text-uppercase fw-bold">
-                            <a class="text-danger" href="@_blogPost.Category.Name-posts">@_blogPost.Category.Name</a>
-                        </p>
-                        <h1 class="display-4 secondfont mb-3 fw-bold">@_blogPost.Title</h1>
-                        <p class="mb-3">
-                            @_blogPost.Introduction
-                        </p>
-                        <div class="d-flex align-items-center pt-4">
-                            <img class="rounded-circle" style="width:12%" src="https://ui-avatars.com/api/?name=@HttpUtility.UrlEncode(_blogPost.User.FullName)&background=random" width="70">
-                            <small class="ps-3">
-                                @_blogPost.User.FullName <span class="text-muted d-block">@_blogPost.PublishedAt.ToDisplay()</span>
-                            </small>
+    <article>
+        @* ============================================================
+           HERO BAND
+           ============================================================ *@
+        <header class="relative overflow-hidden border-b border-base-300">
+            <div class="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-base-100 to-base-100"></div>
+            <div class="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] [background-size:24px_24px]"></div>
+
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 sm:pt-16 sm:pb-12 text-center">
+                <nav class="flex items-center justify-center gap-1.5 text-xs text-base-content/60 mb-6">
+                    <a href="/" class="hover:text-primary transition-colors">Home</a>
+                    @if (_blogPost.Category is not null)
+                    {
+                        <Icon Name="chevron-right" Class="size-3" />
+                        <a href="@(_blogPost.Category.Slug + "-posts")" class="hover:text-primary transition-colors">@_blogPost.Category.Name</a>
+                    }
+                </nav>
+
+                @if (_blogPost.Category is not null)
+                {
+                    <a href="@(_blogPost.Category.Slug + "-posts")"
+                       class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-content text-[11px] font-semibold uppercase tracking-wider rounded-full mb-6 hover:opacity-90 transition-opacity">
+                        @_blogPost.Category.Name
+                    </a>
+                }
+
+                <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.02] mb-6">
+                    @_blogPost.Title
+                </h1>
+                <p class="text-base sm:text-xl text-base-content/70 max-w-2xl mx-auto mb-8">
+                    @_blogPost.Introduction
+                </p>
+
+                <div class="flex items-center justify-center gap-3 text-sm">
+                    <img class="rounded-full size-10 ring-2 ring-base-200"
+                         src="https://ui-avatars.com/api/?name=@HttpUtility.UrlEncode(_blogPost.User?.FullName ?? "")&background=random"
+                         alt="@_blogPost.User?.FullName" />
+                    <div class="text-left">
+                        <div class="font-medium leading-tight">@_blogPost.User?.FullName</div>
+                        <div class="text-xs text-base-content/60 flex items-center gap-2">
+                            <span>@_blogPost.PublishedAt.ToDisplay()</span>
+                            <span>·</span>
+                            <span class="inline-flex items-center gap-1">
+                                <Icon Name="clock" Class="size-3" /> @ReadingTimeMinutes min read
+                            </span>
                         </div>
-                    </div>
-                    <div class="col-md-6 pt-3 pb-2 pr-6 align-self-center">
-                        <img src="@_blogPost.Image">
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="container pt-4 pb-4">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <article class="article-post">
-                    @((MarkupString)_blogPost.Content)
-                </article>
+        </header>
+
+        @* ============================================================
+           COVER IMAGE
+           ============================================================ *@
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-12 sm:-mt-10 sm:mb-16 relative z-10">
+            <div class="aspect-[16/9] rounded-box overflow-hidden bg-base-200 border border-base-300 shadow-lg shadow-primary/5">
+                <img src="@_blogPost.Image" alt="@_blogPost.Title" class="w-full h-full object-cover" />
             </div>
         </div>
-    </div>
+
+        @* ============================================================
+           ARTICLE BODY
+           ============================================================ *@
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+            <div class="article-prose">
+                @((MarkupString)_blogPost.Content)
+            </div>
+
+            @* Tag row *@
+            @if (_blogPost.Category is not null)
+            {
+                <div class="mt-12 pt-8 border-t border-base-300 flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mr-1">Filed under</span>
+                    <a href="@(_blogPost.Category.Slug + "-posts")"
+                       class="inline-flex items-center px-2.5 py-1 rounded-full border border-base-300 text-xs font-medium hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors">
+                        @_blogPost.Category.Name
+                    </a>
+                </div>
+            }
+        </div>
+
+        @* ============================================================
+           AUTHOR CARD
+           ============================================================ *@
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+            <div class="rounded-box border border-base-300 bg-base-200 p-6 sm:p-8 flex items-center gap-5">
+                <img class="rounded-full size-16 sm:size-20 ring-4 ring-base-100 shrink-0"
+                     src="https://ui-avatars.com/api/?name=@HttpUtility.UrlEncode(_blogPost.User?.FullName ?? "")&background=random&size=160"
+                     alt="@_blogPost.User?.FullName" />
+                <div class="min-w-0">
+                    <div class="text-xs uppercase tracking-wider font-semibold text-base-content/50 mb-1">Written by</div>
+                    <div class="font-display text-xl font-semibold tracking-tight">@_blogPost.User?.FullName</div>
+                    <p class="text-sm text-base-content/70 mt-1">Author at BlazingBlog. Sharing notes on .NET, web tooling, and the craft of building software.</p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    @* ============================================================
+       READ NEXT
+       ============================================================ *@
+    @if (_related.Length > 0)
+    {
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+            <header class="flex items-end justify-between mb-8">
+                <div>
+                    <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">Keep reading</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Read next</h2>
+                </div>
+                <a href="/" class="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors">
+                    Back to home <Icon Name="arrow-right" Class="size-4" />
+                </a>
+            </header>
+            <FeaturedBlogPostsList Posts="_related" />
+        </section>
+    }
+
     <SubscribeBox />
-    <div class="container pt-4 pb-4">
-        <h5 class="fw-bold spanborder"><span>Read next</span></h5>
-        <FeaturedBlogPostsList Posts="_related" />
-    </div>
 }
+
 @code {
-    [Parameter]
-    public string BlogPostSlug { get; set; } = default!;
+    [Parameter] public string BlogPostSlug { get; set; } = default!;
 
     private BlogPost? _blogPost = default!;
     private BlogPost[] _related = [];
+
+    private int ReadingTimeMinutes
+    {
+        get
+        {
+            if (_blogPost is null || string.IsNullOrWhiteSpace(_blogPost.Content)) return 1;
+            var stripped = System.Text.RegularExpressions.Regex.Replace(_blogPost.Content, "<[^>]+>", " ");
+            var words = stripped.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+            return Math.Max(1, (int)Math.Ceiling(words / 220.0));
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

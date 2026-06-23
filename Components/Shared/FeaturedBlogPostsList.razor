@@ -1,59 +1,106 @@
-﻿<div class="container pt-4 pb-4">
-    @if (_second is not null)
-    {
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card border-1 mb-4 shadow h-100">
-                    <div class="border border-dark h-75 rounded rounded-2" style="background-image: url(@_second.Image); background-size: cover; background-repeat: no-repeat;margin:3%">
-                    </div>
-                    <div class="card-body pb-0 m-2 d-flex flex-column align-items-start">
-                        <h2 class="h4 fw-bold">
-                            <a class="text-dark" href="/posts/@_second.Slug">@_second.Title</a>
-                        </h2>
-                        <p class="card-text">
-                            @_second.Introduction
-                        </p>
-                        <div>
-                            <small class="d-block">@_second.User.FullName</small>
-                            <small class="text-muted">@_second.PublishedAt.ToDisplay()</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card border-1 mb-4 shadow h-100">
+@using BlazingBlog.Data.Models
+@using BlazingBlog.Utilities
 
-                    @foreach (var post in Posts.Skip(2))
-                    {
-                        <div class="mb-3 p-3 d-flex align-items-center">
-                            <img class="border-dark border rounded rounded-2" style="height:150px;width:40%;object-fit:cover" src="@post.Image">
-                            <div class="ps-3">
-                                <h2 class="mb-2 h6 fw-bold">
-                                    <a class="text-dark" href="/posts/@post.Slug">@post.Title</a>
-                                </h2>
-                                <div class="card-text text-muted small">
-                                    @post.User.FullName in <a href="@post.Category.Slug-posts" title="@post.Category.Name Posts">@post.Category.Name</a>
-                                </div>
-                                <small class="text-muted">@post.PublishedAt.ToDisplay()</small>
-                            </div>
-                        </div>
-                    }
+@if (Posts.Length == 1)
+{
+    <a href="/posts/@Posts[0].Slug"
+       class="group block bg-base-100 border border-base-300 rounded-box overflow-hidden hover:border-primary/60 transition-all">
+        <div class="grid md:grid-cols-2 gap-0">
+            <div class="aspect-[16/10] md:aspect-auto bg-base-200 overflow-hidden">
+                <img src="@Posts[0].Image" alt="@Posts[0].Title"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+            </div>
+            <div class="p-6 sm:p-8 flex flex-col">
+                @if (Posts[0].Category is not null)
+                {
+                    <span class="self-start text-[11px] font-semibold uppercase tracking-wider text-primary mb-2">@Posts[0].Category!.Name</span>
+                }
+                <h3 class="font-display text-2xl sm:text-3xl font-semibold leading-snug tracking-tight mb-3 group-hover:text-primary transition-colors">@Posts[0].Title</h3>
+                <p class="text-sm sm:text-base text-base-content/70 mb-4 line-clamp-3">@Posts[0].Introduction</p>
+                <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
+                    <span>@Posts[0].User?.FullName</span>
+                    <span>@Posts[0].PublishedAt.ToDisplay()</span>
                 </div>
             </div>
         </div>
-    }
-</div>
+    </a>
+}
+else if (Posts.Length == 2)
+{
+    <div class="grid gap-6 md:grid-cols-2">
+        @foreach (var post in Posts)
+        {
+            <a href="/posts/@post.Slug"
+               class="group flex flex-col bg-base-100 border border-base-300 rounded-box overflow-hidden hover:border-primary/60 transition-all">
+                <div class="aspect-[16/10] bg-base-200 overflow-hidden">
+                    <img src="@post.Image" alt="@post.Title"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                </div>
+                <div class="p-6 flex flex-col">
+                    @if (post.Category is not null)
+                    {
+                        <span class="self-start text-[11px] font-semibold uppercase tracking-wider text-primary mb-2">@post.Category.Name</span>
+                    }
+                    <h3 class="font-display text-xl sm:text-2xl font-semibold leading-snug tracking-tight mb-3 group-hover:text-primary transition-colors">@post.Title</h3>
+                    <p class="text-sm text-base-content/70 mb-4 line-clamp-3">@post.Introduction</p>
+                    <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
+                        <span>@post.User?.FullName</span>
+                        <span>@post.PublishedAt.ToDisplay()</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+}
+else if (Posts.Length >= 3)
+{
+    <div class="grid gap-6 lg:grid-cols-2">
+        <a href="/posts/@Posts[0].Slug"
+           class="group flex flex-col bg-base-100 border border-base-300 rounded-box overflow-hidden hover:border-primary/60 transition-all">
+            <div class="aspect-[16/10] bg-base-200 overflow-hidden">
+                <img src="@Posts[0].Image" alt="@Posts[0].Title"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+            </div>
+            <div class="p-6 flex flex-col">
+                @if (Posts[0].Category is not null)
+                {
+                    <span class="self-start text-[11px] font-semibold uppercase tracking-wider text-primary mb-2">@Posts[0].Category!.Name</span>
+                }
+                <h3 class="font-display text-2xl font-semibold leading-snug tracking-tight mb-3 group-hover:text-primary transition-colors">@Posts[0].Title</h3>
+                <p class="text-sm text-base-content/70 mb-4 line-clamp-3">@Posts[0].Introduction</p>
+                <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
+                    <span>@Posts[0].User?.FullName</span>
+                    <span>@Posts[0].PublishedAt.ToDisplay()</span>
+                </div>
+            </div>
+        </a>
+
+        <div class="flex flex-col gap-4">
+            @foreach (var post in Posts.Skip(1))
+            {
+                <a href="/posts/@post.Slug"
+                   class="group flex gap-4 p-3 rounded-box border border-base-300 hover:border-primary/60 hover:bg-base-200/50 transition-all">
+                    <div class="size-28 sm:size-32 shrink-0 rounded-md overflow-hidden bg-base-200">
+                        <img src="@post.Image" alt="@post.Title"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    </div>
+                    <div class="min-w-0 flex flex-col">
+                        @if (post.Category is not null)
+                        {
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-primary">@post.Category.Name</span>
+                        }
+                        <h4 class="font-display text-sm sm:text-base font-semibold leading-snug mt-1 mb-1 group-hover:text-primary transition-colors line-clamp-2">@post.Title</h4>
+                        <div class="mt-auto text-xs text-base-content/60 flex items-center gap-2">
+                            <span>@post.User?.FullName</span><span>·</span><span>@post.PublishedAt.ToDisplay()</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+}
+
 @code {
     [Parameter, EditorRequired]
     public BlogPost[] Posts { get; set; } = [];
-
-    private BlogPost? _second = default;
-
-    protected override void OnInitialized()
-    {
-        if (Posts.Length > 0)
-        {
-            _second = Posts.Skip(1).FirstOrDefault();
-        }
-    }
 }

@@ -1,76 +1,230 @@
-﻿@page "/"
-
+@page "/"
+@using BlazingBlog.Data.Models
 @inject IBlogPostService BlogPostService
+@inject ICategoryService CategoryService
 
-<PageTitle>Home</PageTitle>
-@if (noPostsToShow)
-{
-    <div class="container pt-4">
-        <div class="alert alert-warning text-center fw-bolder" role="alert">
-            No Posts Available
-        </div>
-    </div>
-}
+<PageTitle>BlazingBlog · Modern stories &amp; tutorials</PageTitle>
 
-@if (_first is not null)
-{
-    <div class="container card shadow border border-1 rounded rounded-2 bg-lightblue">
-        <div class="jumbotron m-3 py-0 position-relative">
-            <div class="h-100 tofront">
-                <div class="row justify-content-between">
-                    <div class="col-md-6 pt-6 pb-6 align-self-center">
-                        <h1 class="secondfont mb-3 fw-bolder">@_first.Title</h1>
-                        <p class="mb-3">
-                            @_first.Introduction
-                        </p>
-                        <a href="posts/@_first.Slug" class="btn btn-dark">Read More</a>
+@* ============================================================
+   HERO BAND
+   ============================================================ *@
+<section class="relative overflow-hidden border-b border-base-300">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-base-100 to-base-100"></div>
+    <div class="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] [background-size:24px_24px]"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 sm:pt-20 sm:pb-24">
+
+        @if (noPostsToShow)
+        {
+            <div class="text-center max-w-2xl mx-auto">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200 text-xs font-semibold uppercase tracking-wider text-base-content/70 mb-4">
+                    <Icon Name="alert-triangle" Class="size-3.5" /> Coming soon
+                </span>
+                <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05] mb-4">
+                    No posts yet — check back soon.
+                </h1>
+                <p class="text-base-content/70 text-lg">
+                    We're brewing the first stories. Subscribe below to be the first to read them.
+                </p>
+            </div>
+        }
+        else if (_first is not null)
+        {
+            <div class="grid gap-10 lg:grid-cols-12 items-center">
+                <div class="lg:col-span-7 order-2 lg:order-1">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-content text-[11px] font-semibold uppercase tracking-wider">
+                            <span class="size-1.5 rounded-full bg-current"></span> Latest
+                        </span>
+                        @if (_first.Category is not null)
+                        {
+                            <a href="@(_first.Category.Slug + "-posts")"
+                               class="text-xs font-semibold uppercase tracking-wider text-base-content/60 hover:text-primary transition-colors">
+                                in @_first.Category.Name
+                            </a>
+                        }
                     </div>
-                    <div class="col-md-6 d-none d-md-block pr-0 border border-dark rounded rounded-2" style="background-size:cover;background-image:url(@_first.Image);"></div>
+
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.02] mb-5">
+                        <a href="posts/@_first.Slug" class="hover:text-primary transition-colors">@_first.Title</a>
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-base-content/70 mb-7 max-w-2xl line-clamp-3">
+                        @_first.Introduction
+                    </p>
+
+                    <div class="flex items-center gap-3 mb-7">
+                        <img class="rounded-full size-9 ring-2 ring-base-200"
+                             src="https://ui-avatars.com/api/?name=@System.Web.HttpUtility.UrlEncode(_first.User?.FullName ?? "")&background=random"
+                             alt="@_first.User?.FullName" />
+                        <div class="text-sm">
+                            <div class="font-medium leading-tight">@_first.User?.FullName</div>
+                            <div class="text-xs text-base-content/60">@_first.PublishedAt.ToDisplay()</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <a href="posts/@_first.Slug" class="btn btn-primary gap-2">
+                            Read article <Icon Name="arrow-right" Class="size-4" />
+                        </a>
+                        <a href="#latest" class="btn btn-ghost gap-2">
+                            Browse all
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 order-1 lg:order-2">
+                    <a href="posts/@_first.Slug" class="group block relative">
+                        <div class="absolute -inset-3 bg-primary/15 rounded-[1.5rem] blur-2xl opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative aspect-[4/3] rounded-box overflow-hidden border border-base-300 bg-base-200">
+                            <img src="@_first.Image" alt="@_first.Title"
+                                 class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                        </div>
+                    </a>
                 </div>
             </div>
-        </div>
-    </div>
-}
-@if (_featured.Length > 0)
-{
-    <FeaturedBlogPostsList Posts="_featured" />
-}
-
-<div class="container">
-    <div class="row justify-content-between">
-        <div class="col-md-8">
-            @if (_recent.Length > 0)
-            {
-                <h5 class="fw-bold spanborder"><span>Recently Published</span></h5>
-                <BlogPostsList Posts="_recent" />
-            }
-        </div>
-        @if (_popular.Length > 0)
-        {
-            <PopularBlogPostsList Posts="_popular" />
         }
     </div>
-</div>
-<SubscribeBox />
+</section>
+
+@if (!noPostsToShow)
+{
+    @* ============================================================
+       TOPIC CHIPS
+       ============================================================ *@
+    @if (_categories.Length > 0)
+    {
+        <section class="border-b border-base-300 bg-base-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+                <div class="flex items-center gap-3">
+                    <span class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-base-content/50 shrink-0">
+                        <Icon Name="tag" Class="size-3.5" /> Topics
+                    </span>
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden">
+                        @foreach (var category in _categories)
+                        {
+                            <a href="@(category.Slug + "-posts")"
+                               class="shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-base-300 bg-base-100 text-xs font-medium text-base-content/80 hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors">
+                                @category.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+
+        @* ============================================================
+           FEATURED STORIES
+           ============================================================ *@
+        @{ var featuredRest = _featured.Skip(1).ToArray(); }
+        @if (featuredRest.Length > 0)
+        {
+            <section class="mb-16">
+                <header class="flex items-end justify-between mb-8">
+                    <div>
+                        <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">Editor's picks</span>
+                        <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Featured stories</h2>
+                    </div>
+                    <a href="#latest" class="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors">
+                        See all <Icon Name="arrow-right" Class="size-4" />
+                    </a>
+                </header>
+                <FeaturedBlogPostsList Posts="featuredRest" />
+            </section>
+        }
+
+        @* ============================================================
+           LATEST + SIDEBAR
+           ============================================================ *@
+        <section id="latest" class="scroll-mt-24 grid gap-12 lg:grid-cols-[1fr_320px]">
+            <div class="min-w-0">
+                @if (_recent.Length > 0)
+                {
+                    <header class="flex items-end justify-between mb-8">
+                        <div>
+                            <span class="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">Fresh off the press</span>
+                            <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Latest articles</h2>
+                        </div>
+                    </header>
+                    <BlogPostsList Posts="_recent" />
+                }
+            </div>
+
+            <aside class="space-y-8">
+                @if (_popular.Length > 0)
+                {
+                    <PopularBlogPostsList Posts="_popular" />
+                }
+
+                <div class="relative overflow-hidden rounded-box bg-gradient-to-br from-primary/10 via-base-200 to-base-200 border border-base-300 p-6">
+                    <div class="absolute -top-12 -right-12 size-32 bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="relative">
+                        <span class="inline-flex items-center justify-center size-9 rounded-full bg-primary text-primary-content mb-3">
+                            <Icon Name="mail" Class="size-4" />
+                        </span>
+                        <h3 class="font-display text-lg font-semibold tracking-tight mb-1">Never miss a post</h3>
+                        <p class="text-sm text-base-content/70 mb-4">Get weekly highlights straight to your inbox.</p>
+                        <a href="#subscribe" class="btn btn-primary btn-sm w-full gap-1">
+                            Subscribe <Icon Name="arrow-right" Class="size-4" />
+                        </a>
+                    </div>
+                </div>
+
+                @if (_categories.Length > 0)
+                {
+                    <div class="rounded-box border border-base-300 bg-base-100 p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="inline-block w-1 h-5 bg-primary rounded-full"></span>
+                            <h3 class="font-display text-sm font-semibold uppercase tracking-wider">Explore topics</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var category in _categories.Take(8))
+                            {
+                                <a href="@(category.Slug + "-posts")"
+                                   class="inline-flex items-center px-2.5 py-1 rounded-md bg-base-200 text-xs font-medium text-base-content/80 hover:bg-primary/10 hover:text-primary transition-colors">
+                                    @category.Name
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </aside>
+        </section>
+    </div>
+
+    <div id="subscribe">
+        <SubscribeBox />
+    </div>
+}
+
 @code {
     private BlogPost[] _featured = [];
     private BlogPost[] _popular = [];
     private BlogPost[] _recent = [];
+    private Category[] _categories = [];
     private BlogPost? _first = default;
     private bool noPostsToShow = false;
 
     protected override async Task OnParametersSetAsync()
     {
-        var posts = await Task.WhenAll
-        (
-           BlogPostService.GetFeaturedBlogPostsAsync(5),
-           BlogPostService.GetPopularBlogPostsAsync(4),
-           BlogPostService.GetRecentBlogPostsAsync(5)
+        var postsTask = Task.WhenAll(
+            BlogPostService.GetFeaturedBlogPostsAsync(5),
+            BlogPostService.GetPopularBlogPostsAsync(4),
+            BlogPostService.GetRecentBlogPostsAsync(6)
         );
+        var categoriesTask = CategoryService.GetCategoriesAsync();
+
+        await Task.WhenAll(postsTask, categoriesTask);
+
+        var posts = postsTask.Result;
         noPostsToShow = !posts.Any(ar => ar.Length > 0);
         _featured = posts[0];
         _popular = posts[1];
         _recent = posts[2];
-        _first = _featured.FirstOrDefault();
+        _first = _featured.FirstOrDefault() ?? _recent.FirstOrDefault();
+        _categories = categoriesTask.Result.ToArray();
     }
 }
